@@ -166,7 +166,7 @@ export class CounselorService {
 
   async getCounseleesByCounselor(id: string) {
     try {
-      const counselor = await this.CounselorRepository.findOne({
+      const counselor = await this.CounselorRepository.find({
         where: { id },
       });
       if (!counselor) {
