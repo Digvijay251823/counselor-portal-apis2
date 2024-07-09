@@ -37,7 +37,9 @@ export class Counselee {
   @Column({ nullable: true })
   yourInitiatingSpiritualMaster: string;
   @Column({ nullable: true })
-  harinamInitiationDate: Date;
+  harinamInitiationDate: string;
+  @Column({ nullable: true })
+  legalNameOfSpouce: string;
   @Column({ nullable: true })
   harinamInitiationPlace: string;
   @Column({ nullable: true })

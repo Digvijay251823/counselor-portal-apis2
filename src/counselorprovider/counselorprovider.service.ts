@@ -35,7 +35,6 @@ export class CounselorproviderService {
   }
   async create(CounselorProviderSchema: Partial<CounselorProviderEntity>) {
     try {
-      console.log(CounselorProviderSchema);
       const counselee = await this.counseleeService.findOne({
         where: { id: CounselorProviderSchema.counselee.toString() },
       });

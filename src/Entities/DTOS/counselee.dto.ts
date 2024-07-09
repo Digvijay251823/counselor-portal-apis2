@@ -25,11 +25,13 @@ export class CounseleeSchema {
   @ApiProperty()
   yourInitiatingSpiritualMaster: string;
   @ApiProperty()
-  harinamInitiationDate: Date;
+  harinamInitiationDate: string;
   @ApiProperty()
   harinamInitiationPlace: string;
   @ApiProperty()
   recommendedBy: string;
+  @ApiProperty()
+  legalNameOfSpouce: string;
   @ApiProperty()
   currentCounselor: string;
   @ApiProperty()
