@@ -119,11 +119,12 @@ export class CounseleeController {
   @UseGuards(RolesGuard)
   @ApiSecurity('JWT-auth')
   @Put('/updatecounselor')
-  async updateCounselor(@Body() updateCounselorDto: updateCounselor) {
-    return this.counseleeService.updateCounselee(
-      updateCounselorDto.counselorid,
-      updateCounselorDto.counseleeid,
-    );
+  @ApiBody({ type: updateCounselor })
+  async updateCounselor(
+    @Body('counselorId') counselorId: string,
+    @Body('counseleeId') counseleeid: string,
+  ) {
+    return this.counseleeService.updateCounselee(counselorId, counseleeid);
   }
 
   @ApiOperation({ summary: 'get Counselor by phonenumber' })

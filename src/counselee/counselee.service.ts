@@ -106,6 +106,18 @@ export class CounseleeService {
   }
   async updateCounselee(counselorid: string, counseleeid: string) {
     try {
+      if (!counselorid) {
+        throw new HttpException(
+          'Not Able To Get Counselor',
+          HttpStatus.NOT_FOUND,
+        );
+      }
+      if (!counseleeid) {
+        throw new HttpException(
+          'Not Able To Get Counselee',
+          HttpStatus.NOT_FOUND,
+        );
+      }
       const counselee = await this.CounseleeModel.findOne({
         where: { id: counseleeid },
       });
@@ -118,6 +130,7 @@ export class CounseleeService {
           HttpStatus.NOT_FOUND,
         );
       }
+
       counselee.currentCounselor = counselor;
       counselee.connectedToCounselorSince = new Date();
       await this.CounseleeModel.save(counselee);

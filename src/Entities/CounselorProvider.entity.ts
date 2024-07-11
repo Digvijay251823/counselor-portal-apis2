@@ -15,7 +15,7 @@ import { Counselor } from './Counselor.entity';
 export class CounselorProviderEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
-  @OneToOne(() => Counselee, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Counselee, { onDelete: 'CASCADE' })
   @JoinColumn()
   counselee: Counselee;
   @ManyToOne(() => Counselor, { nullable: true, onDelete: 'CASCADE' })
