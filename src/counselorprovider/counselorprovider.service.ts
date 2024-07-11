@@ -39,12 +39,14 @@ export class CounselorproviderService {
         where: { id: CounselorProviderSchema.counselee.toString() },
       });
       const existingEntry = await this.counselorProvider.findOne({
-        where: { counselee: { id: counselee.id } },
+        where: { counselee: { id: counselee.id }, statusOfChange: 'PENDING' },
       });
       if (existingEntry) {
         throw new HttpException('already exists', HttpStatus.CONFLICT);
       }
-      const newEntry = this.counselorProvider.create(CounselorProviderSchema);
+      const newEntry = this.counselorProvider.create({
+        ...CounselorProviderSchema,
+      });
       await this.counselorProvider.save(newEntry);
       return { Success: true, message: 'Submitted the form' };
     } catch (error) {
