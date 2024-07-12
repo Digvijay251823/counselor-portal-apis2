@@ -182,7 +182,7 @@ export class CounseleeService {
     try {
       const Counselee = await this.CounseleeModel.findOne({
         where: { phoneNumber: phoneNumber },
-        relations: ['husband', 'currentCounselor'],
+        relations: ['spouce', 'currentCounselor'],
       });
       if (!Counselee) {
         throw new HttpException('counselee doesnt exist', 404);
