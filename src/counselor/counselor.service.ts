@@ -166,7 +166,7 @@ export class CounselorService {
 
   async getCounseleesByCounselor(id: string) {
     try {
-      const counselor = await this.CounselorRepository.find({
+      const counselor = await this.CounselorRepository.findOne({
         where: { id },
       });
       if (!counselor) {
@@ -175,13 +175,14 @@ export class CounselorService {
           HttpStatus.NOT_FOUND,
         );
       }
-      const counseleesList = await this.CounseleeRepository.find({
-        where: { currentCounselor: { id } },
-      });
+      const [counseleesList, total] =
+        await this.CounseleeRepository.findAndCount({
+          where: { currentCounselor: { id } },
+        });
       if (counseleesList.length === 0) {
         throw new HttpException('no counselee exists', HttpStatus.NOT_FOUND);
       }
-      return { Success: true, content: counseleesList };
+      return { Success: true, content: counseleesList, total };
     } catch (error) {
       throw error;
     }

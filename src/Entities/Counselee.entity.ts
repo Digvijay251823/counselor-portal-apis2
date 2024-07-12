@@ -48,6 +48,8 @@ export class Counselee {
   chantingStartedThisRoundsDate: Date;
   @Column({ nullable: true })
   recommendedBy: string;
+  @Column({ nullable: true })
+  comments: string;
   @ManyToOne(() => Counselor, { nullable: true, onDelete: 'CASCADE' })
   @JoinColumn()
   currentCounselor: Counselor;
@@ -55,7 +57,7 @@ export class Counselee {
   connectedToCounselorSince: Date;
   @OneToOne(() => Counselee, { nullable: true, onDelete: 'CASCADE' })
   @JoinColumn()
-  husband: Counselee;
+  spouce: Counselee;
   @Column({ type: 'jsonb', nullable: true })
   children: JSON;
   @CreateDateColumn()

@@ -21,8 +21,10 @@ export class CounselorSchema {
   password: string;
   @ApiProperty()
   maritalStatus: string;
+  // @ApiProperty()
+  // husband: string;
   @ApiProperty()
-  husband: string;
+  spouce: string;
   @ApiProperty()
   address: string;
   @ApiProperty()

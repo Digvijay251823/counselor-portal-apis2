@@ -5,6 +5,8 @@ import { Counselee } from 'src/Entities/Counselee.entity';
 import { counseleeActivity } from 'src/Entities/CounseleeActivity.entity';
 import { Counselor } from 'src/Entities/Counselor.entity';
 import { CreateCounseleeActivityDto } from 'src/Entities/DTOS/counseleeActivity.dto';
+import { ActivitiesFilters } from 'src/Entities/DTOS/Filters/counselee-activity.dto';
+import { PageableDto } from 'src/Entities/DTOS/pageable.dto';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -62,13 +64,53 @@ export class CounseleeActivityService {
     }
   }
 
-  async findAll(): Promise<
-    { Success: true; content: counseleeActivity[] } | Error
-  > {
+  async findAll(
+    activitiesFilter: ActivitiesFilters,
+    pageable: PageableDto,
+  ): Promise<{ Success: true; content: counseleeActivity[] } | Error> {
+    console.log(activitiesFilter);
     try {
-      const response = await this.counseleeActivityRepository.find({
-        relations: ['counselee', 'counselor', 'activity'],
-      });
+      const QueryBuilder = this.counseleeActivityRepository
+        .createQueryBuilder('counselee-activity')
+        .innerJoinAndSelect('counselee-activity.counselee', 'counselee')
+        .innerJoinAndSelect('counselee-activity.counselor', 'counselor')
+        .innerJoinAndSelect('counselee-activity.activity', 'activity');
+
+      if (activitiesFilter.firstName) {
+        QueryBuilder.andWhere('counselee.firstName ILIKE :firstName', {
+          firstName: `%${activitiesFilter.firstName}`,
+        });
+      }
+      if (activitiesFilter.lastName) {
+        QueryBuilder.andWhere('counselee.lastName ILIKE :lastName', {
+          lastName: `%${activitiesFilter.lastName}`,
+        });
+      }
+      if (activitiesFilter.phoneNumber) {
+        QueryBuilder.andWhere('counselee.phoneNumber ILIKE :phoneNumber', {
+          phoneNumber: `%${activitiesFilter.phoneNumber}`,
+        });
+      }
+      if (activitiesFilter.initiatedName) {
+        QueryBuilder.andWhere('counselee.initiatedName ILIKE :initiatedName', {
+          initiatedName: `%${activitiesFilter.initiatedName}`,
+        });
+      }
+      if (activitiesFilter.activityName) {
+        QueryBuilder.andWhere('activity.name ILIKE :activityName', {
+          activityName: `%${activitiesFilter.activityName}`,
+        });
+      }
+      if (activitiesFilter.activityDate) {
+        QueryBuilder.andWhere('activity.activityDate ILIKE :activityDate', {
+          activityDate: `%${activitiesFilter.activityDate}`,
+        });
+      }
+      const page = pageable.page || 1;
+      const limit = pageable.size || 10;
+      QueryBuilder.skip((page - 1) * limit).take(limit);
+
+      const response = await QueryBuilder.getMany();
       if (response.length === 0) {
         throw new HttpException('no entries in counselee Activities', 404);
       }
@@ -78,7 +120,11 @@ export class CounseleeActivityService {
     }
   }
 
-  async getByCounselorId(id: string) {
+  async getByCounselorId(
+    id: string,
+    activitiesFilter: ActivitiesFilters,
+    pageable: PageableDto,
+  ) {
     try {
       const response = await this.counselorRepository.findOne({
         where: { id },
@@ -86,10 +132,48 @@ export class CounseleeActivityService {
       if (!response) {
         throw new HttpException('Counselor not found', 404);
       }
-      const counseleeActivity = await this.counseleeActivityRepository.find({
-        where: { counselor: { id } },
-        relations: ['counselee', 'counselor', 'activity'],
-      });
+      const QueryBuilder = this.counseleeActivityRepository
+        .createQueryBuilder('counselee-activity')
+        .innerJoinAndSelect('counselee-activity.counselee', 'counselee')
+        .innerJoinAndSelect('counselee-activity.counselor', 'counselor')
+        .innerJoinAndSelect('counselee-activity.activity', 'activity')
+        .where('counselor.id = :id', { id });
+
+      if (activitiesFilter.firstName) {
+        QueryBuilder.andWhere('counselee.firstName ILIKE :firstName', {
+          firstName: `%${activitiesFilter.firstName}`,
+        });
+      }
+      if (activitiesFilter.lastName) {
+        QueryBuilder.andWhere('counselee.lastName ILIKE :lastName', {
+          lastName: `%${activitiesFilter.lastName}`,
+        });
+      }
+      if (activitiesFilter.phoneNumber) {
+        QueryBuilder.andWhere('counselee.phoneNumber ILIKE :phoneNumber', {
+          phoneNumber: `%${activitiesFilter.phoneNumber}`,
+        });
+      }
+      if (activitiesFilter.initiatedName) {
+        QueryBuilder.andWhere('counselee.initiatedName ILIKE :initiatedName', {
+          initiatedName: `%${activitiesFilter.initiatedName}`,
+        });
+      }
+      if (activitiesFilter.activityName) {
+        QueryBuilder.andWhere('activity.name ILIKE :activityName', {
+          activityName: `%${activitiesFilter.activityName}`,
+        });
+      }
+      if (activitiesFilter.activityDate) {
+        QueryBuilder.andWhere('activity.activityDate ILIKE :activityDate', {
+          activityDate: `%${activitiesFilter.activityDate}`,
+        });
+      }
+      const page = pageable.page || 1;
+      const limit = pageable.size || 10;
+      QueryBuilder.skip((page - 1) * limit).take(limit);
+
+      const [result, total] = await QueryBuilder.getManyAndCount();
       return { Success: true, content: counseleeActivity };
     } catch (error) {
       throw error;

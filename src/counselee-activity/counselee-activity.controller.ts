@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { CounseleeActivityService } from './counselee-activity.service';
@@ -19,6 +20,8 @@ import { ApiResponseMessage } from 'src/Entities/DTOS/Success.dto';
 import { RolesGuard } from 'src/roles/roles.guard';
 import { Roles } from 'src/Entities/DTOS/Roles.dto';
 import { Role } from 'src/Entities/DTOS/role.enum';
+import { ActivitiesFilters } from 'src/Entities/DTOS/Filters/counselee-activity.dto';
+import { PageableDto } from 'src/Entities/DTOS/pageable.dto';
 
 @ApiTags('counselee-activity')
 @Controller('counselee-activity')
@@ -33,8 +36,11 @@ export class CounseleeActivityController {
     status: 200,
     type: [CreateCounseleeActivityDto],
   })
-  findAll() {
-    return this.counseleeActivityService.findAll();
+  findAll(
+    @Query() activityFilter: ActivitiesFilters,
+    @Query() pageable: PageableDto,
+  ) {
+    return this.counseleeActivityService.findAll(activityFilter, pageable);
   }
 
   @Get('/counselor/:counselorid')
@@ -45,8 +51,16 @@ export class CounseleeActivityController {
     status: 200,
     type: [CreateCounseleeActivityDto],
   })
-  async getByCounselorId(@Param('counselorid') counselorid: string) {
-    return this.counseleeActivityService.getByCounselorId(counselorid);
+  async getByCounselorId(
+    @Param('counselorid') counselorid: string,
+    @Query() activitiesFilter: ActivitiesFilters,
+    @Query() pageable: PageableDto,
+  ) {
+    return this.counseleeActivityService.getByCounselorId(
+      counselorid,
+      activitiesFilter,
+      pageable,
+    );
   }
 
   @Post('/create')

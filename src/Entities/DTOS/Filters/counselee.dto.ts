@@ -1,6 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
-export class ActivitiesFilters {
+export class CounseleeFilter {
   @ApiPropertyOptional()
   firstName: string;
   @ApiPropertyOptional()
@@ -10,7 +10,7 @@ export class ActivitiesFilters {
   @ApiPropertyOptional()
   initiatedName: string;
   @ApiPropertyOptional()
-  activityName: string;
+  gender: string;
   @ApiPropertyOptional()
-  activityDate: Date;
+  maritalStatus: string;
 }

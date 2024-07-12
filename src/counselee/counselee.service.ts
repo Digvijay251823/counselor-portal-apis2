@@ -3,6 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 
 import { Counselee } from 'src/Entities/Counselee.entity';
 import { Counselor } from 'src/Entities/Counselor.entity';
+import { CounseleeFilter } from 'src/Entities/DTOS/Filters/counselee.dto';
+import { PageableDto } from 'src/Entities/DTOS/pageable.dto';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -14,25 +16,61 @@ export class CounseleeService {
     private readonly CounselorModel: Repository<Counselor>,
   ) {}
 
-  async getCounselee(
-    page: number,
-    limit: number,
-    sortBy: string,
-    sortOrder: 'ASC' | 'DESC',
-  ) {
-    const skip = (page - 1) * limit;
-    const order = { [sortBy]: sortOrder };
+  async getCounselee(pageable: PageableDto, filtersCounselee: CounseleeFilter) {
     try {
-      const counselee = await this.CounseleeModel.find({
-        relations: ['husband', 'currentCounselor'],
-        skip,
-        take: limit,
-        order,
-      });
-      if (counselee?.length === 0) {
+      const queryBuilder = this.CounseleeModel.createQueryBuilder('counselee')
+        .leftJoinAndSelect('counselee.spouce', 'spouce')
+        .leftJoinAndSelect('counselee.currentCounselor', 'counselor');
+
+      if (filtersCounselee.firstName) {
+        queryBuilder.andWhere('counselee.firstName ILIKE :firstName', {
+          firstName: `%${filtersCounselee.firstName}%`,
+        });
+      }
+      if (filtersCounselee.lastName) {
+        queryBuilder.andWhere('counselee.lastName ILIKE :lastName', {
+          lastName: `%${filtersCounselee.lastName}%`,
+        });
+      }
+      if (filtersCounselee.phoneNumber) {
+        queryBuilder.andWhere('counselee.phoneNumber ILIKE :phoneNumber', {
+          phoneNumber: `%${filtersCounselee.phoneNumber}%`,
+        });
+      }
+      if (filtersCounselee.initiatedName) {
+        queryBuilder.andWhere('counselee.initiatedName ILIKE :initiatedName', {
+          initiatedName: `%${filtersCounselee.initiatedName}%`,
+        });
+      }
+      if (filtersCounselee.gender) {
+        queryBuilder.andWhere('counselee.gender = :gender', {
+          gender: filtersCounselee.gender,
+        });
+      }
+      if (filtersCounselee.maritalStatus) {
+        queryBuilder.andWhere('counselee.maritalStatus = :maritalStatus', {
+          maritalStatus: filtersCounselee.maritalStatus,
+        });
+      }
+
+      let page = pageable.page || 1;
+      if (page < 1) {
+        page = 1;
+      }
+      const limit = pageable.size || 10;
+      queryBuilder.skip((page - 1) * limit).take(limit);
+      const [result, total] = await queryBuilder.getManyAndCount();
+      if (result?.length === 0) {
         throw new HttpException('No Counselee to show', HttpStatus.NOT_FOUND);
       }
-      return { Success: true, content: counselee };
+
+      return {
+        Success: true,
+        content: result,
+        total: total,
+        page: page,
+        limit: limit,
+      };
     } catch (error) {
       throw error;
     }
@@ -159,7 +197,7 @@ export class CounseleeService {
     try {
       const counselee = await this.CounseleeModel.findOne({
         where: { id },
-        relations: ['husband', 'currentCounselor'],
+        relations: ['spouce', 'currentCounselor'],
       });
       if (!counselee) {
         throw new HttpException('counselee doesnt exist please register', 404);
@@ -187,7 +225,7 @@ export class CounseleeService {
       }
 
       const counseleeFemale = await this.CounseleeModel.findOne({
-        where: { husband: { id: counseleeMale.id } },
+        where: { spouce: { id: counseleeMale.id } },
       });
       return { Success: true, content: counseleeFemale };
     } catch (error) {

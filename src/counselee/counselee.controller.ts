@@ -28,6 +28,8 @@ import { ApiResponseMessage } from 'src/Entities/DTOS/Success.dto';
 import { RolesGuard } from 'src/roles/roles.guard';
 import { Role } from 'src/Entities/DTOS/role.enum';
 import { Roles } from 'src/Entities/DTOS/Roles.dto';
+import { CounseleeFilter } from 'src/Entities/DTOS/Filters/counselee.dto';
+import { PageableDto } from 'src/Entities/DTOS/pageable.dto';
 
 @ApiTags('Counselee')
 @Controller('counselee')
@@ -35,54 +37,12 @@ export class CounseleeController {
   constructor(private readonly counseleeService: CounseleeService) {}
   @ApiOperation({ summary: 'get the list of counselees' })
   @ApiConsumes('application/json')
-  @ApiResponse({
-    status: 201,
-    description: 'List of all Counselee',
-    type: CounseleeSchema,
-  })
-  @ApiQuery({
-    name: 'page',
-    required: false,
-    type: Number,
-    description: 'Page number',
-    example: 1,
-  })
-  @ApiQuery({
-    name: 'limit',
-    required: false,
-    type: Number,
-    description: 'Page size',
-    example: 10,
-  })
-  @ApiQuery({
-    name: 'sortBy',
-    required: false,
-    type: String,
-    description: 'Field to sort by',
-    example: 'createdAt',
-  })
-  @ApiQuery({
-    name: 'sortOrder',
-    required: false,
-    enum: ['ASC', 'DESC'],
-    description: 'Sort order',
-    example: 'ASC',
-  })
   @Get('/')
   async getCounselee(
-    @Query('page') page = '1',
-    @Query('limit') limit = '10',
-    @Query('sortBy') sortBy = 'createdAt',
-    @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'ASC',
+    @Query() pageable: PageableDto,
+    @Query() filtersCounselee: CounseleeFilter,
   ) {
-    const pageNumber = parseInt(page, 10);
-    const pageSize = parseInt(limit, 10);
-    return this.counseleeService.getCounselee(
-      pageNumber,
-      pageSize,
-      sortBy,
-      sortOrder,
-    );
+    return this.counseleeService.getCounselee(pageable, filtersCounselee);
   }
 
   @ApiOperation({ summary: 'create counselee' })
