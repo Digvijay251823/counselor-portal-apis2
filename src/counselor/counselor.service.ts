@@ -222,6 +222,7 @@ export class CounselorService {
       }
       const query = this.CounseleeRepository.createQueryBuilder('counselee')
         .leftJoinAndSelect('counselee.spouce', 'spouce')
+        .leftJoinAndSelect('counselee.currentCounselor', 'currentCounselor')
         .where('counselee.currentCounselor = :id', { id });
 
       if (counseleeFilter.firstName) {

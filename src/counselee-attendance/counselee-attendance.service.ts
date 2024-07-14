@@ -24,7 +24,7 @@ export class CounseleeAttendanceService {
     createAttendanceDto: CreateAttendanceDto,
   ): Promise<{ Success: boolean; message: string } | Error> {
     try {
-      const { scheduledSessionId, counseleeId, counselorId } =
+      const { scheduledSessionId, counseleeId, counselorId, modeOfAttendance } =
         createAttendanceDto;
       const scheduledSession = await this.scheduledSessionRepository.findOne({
         where: { id: scheduledSessionId },

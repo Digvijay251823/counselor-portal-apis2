@@ -62,16 +62,12 @@ export class Counselor {
   harinamInitiationPlace: string;
   @Column({ type: 'jsonb', nullable: true })
   children: JSON;
-
-  @Column({ default: false })
+  @Column({ default: true })
   autoApprove: boolean;
-
   @CreateDateColumn()
   createdAt: Date;
-
   @UpdateDateColumn()
   updatedAt: Date;
-
   getJWTToken() {
     const token = jwt.sign(
       { id: this.id, role: this.role, phoneNumber: this.phoneNumber },

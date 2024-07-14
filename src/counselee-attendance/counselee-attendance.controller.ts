@@ -10,6 +10,8 @@ import {
 } from '@nestjs/common';
 import {
   ApiOperation,
+  ApiProperty,
+  ApiPropertyOptional,
   ApiResponse,
   ApiSecurity,
   ApiTags,
@@ -21,6 +23,11 @@ import { ApiResponseMessage } from 'src/Entities/DTOS/Success.dto';
 import { RolesGuard } from 'src/roles/roles.guard';
 import { Role } from 'src/Entities/DTOS/role.enum';
 import { Roles } from 'src/Entities/DTOS/Roles.dto';
+
+class AutoApprove {
+  @ApiPropertyOptional()
+  approved: boolean;
+}
 
 @ApiTags('counselee-attendance')
 @Controller('counselee-attendance')
@@ -57,10 +64,13 @@ export class CounseleeAttendanceController {
     type: [Attendance],
   })
   async findAllByCounselor(
-    @Query('approved') approved: boolean,
+    @Query() approved: AutoApprove,
     @Param('id') id: string,
   ): Promise<{ Success: boolean; content: Attendance[] } | Error> {
-    return await this.attendanceService.findAllByCounselor(id, approved);
+    return await this.attendanceService.findAllByCounselor(
+      id,
+      approved.approved,
+    );
   }
 
   @Roles(Role.Counselor, Role.CCT)

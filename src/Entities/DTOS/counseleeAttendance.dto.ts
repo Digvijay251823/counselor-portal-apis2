@@ -10,6 +10,9 @@ export class CreateAttendanceDto {
   @ApiProperty()
   counselorId: string;
 
+  @ApiProperty()
+  modeOfAttendance: string;
+
   @ApiProperty({ enum: ['Attendance', 'RSVP'], default: 'Attendance' })
   type: 'Attendance' | 'RSVP';
 

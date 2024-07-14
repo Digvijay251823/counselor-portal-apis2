@@ -22,6 +22,8 @@ export class Attendance {
   @ManyToOne(() => Counselee)
   @JoinColumn()
   counselee: Counselee;
+  @Column({ default: 'OFFLINE' })
+  modeOfAttendance: string;
   @ManyToOne(() => Counselor)
   @JoinColumn()
   counselor: Counselor;

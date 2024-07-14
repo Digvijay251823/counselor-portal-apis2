@@ -49,7 +49,11 @@ export class CounseleeSadhanaService {
   ): Promise<{ Success: boolean; message: string } | Error> {
     try {
       const sadhanaEntryExist = await this.SadhanaForm.findOne({
-        where: { counselee: { id: createSadhanaFormDto.counseleeId } },
+        where: {
+          counselee: { id: createSadhanaFormDto.counseleeId },
+          counselor: { id: createSadhanaFormDto.counselorId },
+          sadhanaDate: createSadhanaFormDto.sadhanaDate,
+        },
       });
       if (sadhanaEntryExist) {
         throw new HttpException('sadhana already given', 409);
@@ -70,6 +74,7 @@ export class CounseleeSadhanaService {
         ...createSadhanaFormDto,
         counselee: counselee,
         counselor: counselor,
+        sadhanaDate: createSadhanaFormDto.sadhanaDate,
       });
       await this.SadhanaForm.save(sadhanaForm);
       return { Success: true, message: 'successfully submitted Sadhana' };
@@ -88,6 +93,7 @@ export class CounseleeSadhanaService {
       }
       const SadhanaEntries = await this.SadhanaForm.find({
         where: { counselor: { id } },
+        relations: ['counselee', 'counselor'],
       });
 
       return { Success: true, content: SadhanaEntries };
@@ -105,6 +111,7 @@ export class CounseleeSadhanaService {
         throw new HttpException('sadhanaEntry doesnt exist', 404);
       }
       await this.SadhanaForm.delete(id);
+      return { Success: true, message: 'Deleted Sadhana Successfully' };
       return;
     } catch (error) {
       throw error;
