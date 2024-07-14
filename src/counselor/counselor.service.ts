@@ -255,11 +255,13 @@ export class CounselorService {
           maritalStatus: counseleeFilter.maritalStatus,
         });
       }
-
-      const limit = pageable.size ? pageable.size : 10;
+      let page = pageable.page || 1;
+      if (page < 1) {
+        page = 1;
+      }
+      const limit = pageable.size || 10;
       const skip = (pageable?.page > 0 ? Number(pageable.page) - 1 : 0) * limit;
-
-      query.skip(skip).take(10);
+      // query.skip(skip).take(limit);
 
       const [counseleesList, total] = await query.getManyAndCount();
       const totalPages = Math.ceil(total / limit);
@@ -273,6 +275,31 @@ export class CounselorService {
         elements: counseleesList.length,
         totalPages,
         skiped: skip,
+      };
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+  async getCounseleeByCounselorDropDown(id: string) {
+    try {
+      const counselor = await this.CounselorRepository.findOne({
+        where: { id },
+      });
+      if (!counselor) {
+        throw new HttpException(
+          'No Counselor Exists with this id',
+          HttpStatus.NOT_FOUND,
+        );
+      }
+      const counseleesList = await this.CounseleeRepository.find({
+        where: { currentCounselor: { id: counselor.id } },
+      });
+
+      return {
+        Success: true,
+        content: counseleesList,
+        elements: counseleesList.length,
       };
     } catch (error) {
       console.log(error);

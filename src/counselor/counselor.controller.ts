@@ -139,4 +139,10 @@ export class CounselorController {
       counseleeFilter,
     );
   }
+  @ApiResponse({ type: [CounseleeSchema] })
+  @Get('/dropdown/counselees/:id')
+  @ApiOperation({ summary: 'get counselees by counselor id' })
+  async getCounseleeByCounselorDropDown(@Param('id') id: string) {
+    return this.counselorService.getCounseleeByCounselorDropDown(id);
+  }
 }

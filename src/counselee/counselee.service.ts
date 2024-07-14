@@ -58,6 +58,7 @@ export class CounseleeService {
         page = 1;
       }
       const limit = pageable.size || 10;
+      const skip = (pageable?.page > 0 ? Number(pageable.page) - 1 : 0) * limit;
       queryBuilder.skip((page - 1) * limit).take(limit);
       const [result, total] = await queryBuilder.getManyAndCount();
       if (result?.length === 0) {
@@ -70,6 +71,7 @@ export class CounseleeService {
         total: total,
         page: page,
         limit: limit,
+        skipped: skip,
       };
     } catch (error) {
       throw error;
