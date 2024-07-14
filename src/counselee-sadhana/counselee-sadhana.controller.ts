@@ -64,9 +64,7 @@ export class CounseleeSadhanaController {
   }
 
   @ApiOperation({ summary: 'Get All Sadhana Entries Based on counselor id' })
-  @ApiBody({ type: CreateSadhanaFormDto })
   @Get('/counselor/:counselorid')
-  @ApiResponseMessage('successfully registered sadhana')
   async findByCounselor(@Param('id') id: string) {
     return this.SadhanaFormService.findByCounselor(id);
   }

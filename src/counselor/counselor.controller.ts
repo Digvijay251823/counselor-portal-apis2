@@ -32,6 +32,9 @@ import { Role } from 'src/Entities/DTOS/role.enum';
 import { Roles } from 'src/Entities/DTOS/Roles.dto';
 import { RolesGuard } from 'src/roles/roles.guard';
 import { CounseleeSchema } from 'src/Entities/DTOS/counselee.dto';
+import { PageableDto } from 'src/Entities/DTOS/pageable.dto';
+import { CounselorFilter } from 'src/Entities/DTOS/Filters/counselor.dto';
+import { CounseleeFilter } from 'src/Entities/DTOS/Filters/counselee.dto';
 
 @ApiTags('Counselor')
 @Controller('Counselor')
@@ -44,49 +47,12 @@ export class CounselorController {
     description: 'List of all counselors',
     type: CounselorSchema,
   })
-  @ApiQuery({
-    name: 'page',
-    required: false,
-    type: Number,
-    description: 'Page number',
-    example: 1,
-  })
-  @ApiQuery({
-    name: 'limit',
-    required: false,
-    type: Number,
-    description: 'Page size',
-    example: 10,
-  })
-  @ApiQuery({
-    name: 'sortBy',
-    required: false,
-    type: String,
-    description: 'Field to sort by',
-    example: 'createdAt',
-  })
-  @ApiQuery({
-    name: 'sortOrder',
-    required: false,
-    enum: ['ASC', 'DESC'],
-    description: 'Sort order',
-    example: 'ASC',
-  })
   @Get('/')
   async getCounselor(
-    @Query('page') page = '1',
-    @Query('limit') limit = '10',
-    @Query('sortBy') sortBy = 'createdAt',
-    @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'ASC',
+    @Query() pageable: PageableDto,
+    @Query() counselorFilter: CounselorFilter,
   ) {
-    const pageNumber = parseInt(page, 10);
-    const pageSize = parseInt(limit, 10);
-    return this.counselorService.getCounselor(
-      pageNumber,
-      pageSize,
-      sortBy,
-      sortOrder,
-    );
+    return this.counselorService.getCounselor(pageable, counselorFilter);
   }
 
   @Roles(Role.Counselor)
@@ -162,7 +128,15 @@ export class CounselorController {
   @ApiResponse({ type: [CounseleeSchema] })
   @Get('/counselees/:id')
   @ApiOperation({ summary: 'get counselees by counselor id' })
-  async getCounseleesByCounselor(@Param('id') id: string) {
-    return this.counselorService.getCounseleesByCounselor(id);
+  async getCounseleesByCounselor(
+    @Param('id') id: string,
+    @Query() pageable: PageableDto,
+    @Query() counseleeFilter: CounseleeFilter,
+  ) {
+    return this.counselorService.getCounseleesByCounselor(
+      id,
+      pageable,
+      counseleeFilter,
+    );
   }
 }

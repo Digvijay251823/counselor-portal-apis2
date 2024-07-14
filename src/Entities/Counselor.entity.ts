@@ -39,6 +39,9 @@ export class Counselor {
   @OneToOne(() => Counselor, { nullable: true, onDelete: 'CASCADE' })
   @JoinColumn()
   husband: Counselor;
+  @OneToOne(() => Counselor, { nullable: true, onDelete: 'CASCADE' })
+  @JoinColumn()
+  spouce: Counselor;
   @Column({ nullable: true })
   address: string;
   @Column({ nullable: true })

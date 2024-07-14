@@ -72,7 +72,7 @@ export class CounseleeSadhanaService {
         counselor: counselor,
       });
       await this.SadhanaForm.save(sadhanaForm);
-      return { Success: true, message: 'successfully submitted form ' };
+      return { Success: true, message: 'successfully submitted Sadhana' };
     } catch (error) {
       throw error;
     }
