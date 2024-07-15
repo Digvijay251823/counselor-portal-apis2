@@ -19,12 +19,12 @@ export class Attendance {
   @ManyToOne(() => ScheduledSession)
   @JoinColumn()
   scheduledSession: ScheduledSession;
-  @ManyToOne(() => Counselee)
+  @ManyToOne(() => Counselee, { onDelete: 'CASCADE' })
   @JoinColumn()
   counselee: Counselee;
   @Column({ default: 'OFFLINE' })
   modeOfAttendance: string;
-  @ManyToOne(() => Counselor)
+  @ManyToOne(() => Counselor, { onDelete: 'CASCADE' })
   @JoinColumn()
   counselor: Counselor;
   @Column({ default: 'Attendance' })

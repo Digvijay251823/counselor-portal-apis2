@@ -20,7 +20,7 @@ export class CounseleeService {
     try {
       const queryBuilder = this.CounseleeModel.createQueryBuilder('counselee')
         .leftJoinAndSelect('counselee.spouce', 'spouce')
-        .leftJoinAndSelect('counselee.currentCounselor', 'counselor');
+        .leftJoinAndSelect('counselee.currentCounselor', 'currentCounselor');
 
       if (filtersCounselee.firstName) {
         queryBuilder.andWhere('counselee.firstName ILIKE :firstName', {
@@ -61,9 +61,6 @@ export class CounseleeService {
       const skip = (pageable?.page > 0 ? Number(pageable.page) - 1 : 0) * limit;
       queryBuilder.skip((page - 1) * limit).take(limit);
       const [result, total] = await queryBuilder.getManyAndCount();
-      if (result?.length === 0) {
-        throw new HttpException('No Counselee to show', HttpStatus.NOT_FOUND);
-      }
 
       return {
         Success: true,
@@ -71,6 +68,7 @@ export class CounseleeService {
         total: total,
         page: page,
         limit: limit,
+        element: result.length,
         skipped: skip,
       };
     } catch (error) {

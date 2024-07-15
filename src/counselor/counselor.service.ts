@@ -222,7 +222,6 @@ export class CounselorService {
       }
       const query = this.CounseleeRepository.createQueryBuilder('counselee')
         .leftJoinAndSelect('counselee.spouce', 'spouce')
-        .leftJoinAndSelect('counselee.currentCounselor', 'currentCounselor')
         .where('counselee.currentCounselor = :id', { id });
 
       if (counseleeFilter.firstName) {
@@ -261,8 +260,7 @@ export class CounselorService {
       }
       const limit = pageable.size || 10;
       const skip = (pageable?.page > 0 ? Number(pageable.page) - 1 : 0) * limit;
-      // query.skip(skip).take(limit);
-
+      query.skip((page - 1) * limit).take(limit);
       const [counseleesList, total] = await query.getManyAndCount();
       const totalPages = Math.ceil(total / limit);
 
@@ -277,7 +275,6 @@ export class CounselorService {
         skiped: skip,
       };
     } catch (error) {
-      console.log(error);
       throw error;
     }
   }
@@ -292,14 +289,29 @@ export class CounselorService {
           HttpStatus.NOT_FOUND,
         );
       }
-      const counseleesList = await this.CounseleeRepository.find({
-        where: { currentCounselor: { id: counselor.id } },
-      });
+      const [counseleesList, total] =
+        await this.CounseleeRepository.findAndCount({
+          where: { currentCounselor: { id: counselor.id } },
+          select: [
+            'firstName',
+            'lastName',
+            'initiatedName',
+            'id',
+            'email',
+            'phoneNumber',
+          ],
+        });
 
       return {
         Success: true,
         content: counseleesList,
         elements: counseleesList.length,
+        currentCounselor: {
+          initiatedName: counselor.initiatedName,
+          firstName: counselor.firstName,
+          lastName: counselor.firstName,
+        },
+        total,
       };
     } catch (error) {
       console.log(error);

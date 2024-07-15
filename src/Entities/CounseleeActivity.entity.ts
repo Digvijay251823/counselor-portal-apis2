@@ -15,12 +15,12 @@ import { Activities } from './Activities.entity';
 export class counseleeActivity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
-  @ManyToOne(() => Counselee)
+  @ManyToOne(() => Counselee, { onDelete: 'CASCADE' })
   @JoinColumn()
   counselee: Counselee;
   @Column()
   description: string;
-  @ManyToOne(() => Counselor)
+  @ManyToOne(() => Counselor, { onDelete: 'CASCADE' })
   @JoinColumn()
   counselor: Counselor;
   @ManyToOne(() => Activities)

@@ -76,7 +76,7 @@ export class SessionService {
     try {
       const currentTime = new Date();
       const fortyEightHoursAgo = new Date(
-        currentTime.getTime() - 48 * 60 * 60 * 1000,
+        currentTime.getTime() - 72 * 60 * 60 * 1000,
       );
 
       const sessions = await this.sessionModel

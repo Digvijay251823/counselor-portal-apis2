@@ -48,11 +48,17 @@ export class CounseleeSadhanaService {
     createSadhanaFormDto: CreateSadhanaFormDto,
   ): Promise<{ Success: boolean; message: string } | Error> {
     try {
+      const date = new Date(createSadhanaFormDto.sadhanaDate);
+      const normalizedSadhanaDate = new Date(
+        date.getFullYear(),
+        date.getMonth(),
+        date.getDate(),
+      );
       const sadhanaEntryExist = await this.SadhanaForm.findOne({
         where: {
           counselee: { id: createSadhanaFormDto.counseleeId },
           counselor: { id: createSadhanaFormDto.counselorId },
-          sadhanaDate: createSadhanaFormDto.sadhanaDate,
+          sadhanaDate: normalizedSadhanaDate,
         },
       });
       if (sadhanaEntryExist) {
@@ -74,8 +80,9 @@ export class CounseleeSadhanaService {
         ...createSadhanaFormDto,
         counselee: counselee,
         counselor: counselor,
-        sadhanaDate: createSadhanaFormDto.sadhanaDate,
+        sadhanaDate: normalizedSadhanaDate,
       });
+
       await this.SadhanaForm.save(sadhanaForm);
       return { Success: true, message: 'successfully submitted Sadhana' };
     } catch (error) {

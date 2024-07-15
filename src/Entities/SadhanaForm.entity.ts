@@ -13,12 +13,12 @@ import { Counselee } from './Counselee.entity';
 export class SadhanaForm {
   @PrimaryGeneratedColumn('uuid')
   id: string;
-  @ManyToOne(() => Counselor)
+  @ManyToOne(() => Counselor, { onDelete: 'CASCADE' })
   counselor: Counselor;
-  @ManyToOne(() => Counselee)
+  @ManyToOne(() => Counselee, { onDelete: 'CASCADE' })
   counselee: Counselee;
   @Column({ nullable: true })
-  numberOfRounds: string;
+  numberOfRounds: number;
   @Column({ type: 'time', nullable: true })
   first8RoundsCompletedTime: string;
   @Column({ type: 'time', nullable: true })
@@ -30,13 +30,13 @@ export class SadhanaForm {
   @Column({ nullable: true })
   prabhupadaBookReading: number;
   @Column({ nullable: true })
-  nonPrabhupadaBookReading: number;
+  nonPrabhupadaBookReading: string; //type is text
   @Column({ nullable: true })
-  prabhupadaClassHearing: number;
+  prabhupadaClassHearing: number; //type is time
   @Column({ nullable: true })
-  guruClassHearing: number;
+  guruClassHearing: number; //type is time
   @Column({ nullable: true })
-  otherClassHearing: number;
+  otherClassHearing: number; //type is time
   @Column({ nullable: true })
   speaker: string;
   @Column({ nullable: true })

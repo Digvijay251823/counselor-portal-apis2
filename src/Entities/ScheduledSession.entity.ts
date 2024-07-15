@@ -43,7 +43,7 @@ export class ScheduledSession {
     const now = new Date();
     const hoursDiff =
       (now.getTime() - new Date(this.startTime).getTime()) / (1000 * 60 * 60);
-    if (hoursDiff > 48) {
+    if (hoursDiff > 72) {
       this.expired = true;
     }
   }
