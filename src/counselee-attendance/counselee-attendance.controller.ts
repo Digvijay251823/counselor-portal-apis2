@@ -23,11 +23,8 @@ import { ApiResponseMessage } from 'src/Entities/DTOS/Success.dto';
 import { RolesGuard } from 'src/roles/roles.guard';
 import { Role } from 'src/Entities/DTOS/role.enum';
 import { Roles } from 'src/Entities/DTOS/Roles.dto';
-
-class AutoApprove {
-  @ApiPropertyOptional()
-  approved: boolean;
-}
+import { PageableDto } from 'src/Entities/DTOS/pageable.dto';
+import { CounseleeAttendanceFilter } from 'src/Entities/DTOS/Filters/counselee-attendance.dto';
 
 @ApiTags('counselee-attendance')
 @Controller('counselee-attendance')
@@ -64,12 +61,14 @@ export class CounseleeAttendanceController {
     type: [Attendance],
   })
   async findAllByCounselor(
-    @Query() approved: AutoApprove,
+    @Query() pageable: PageableDto,
+    @Query() counseleeAttendanceFilter: CounseleeAttendanceFilter,
     @Param('id') id: string,
   ): Promise<{ Success: boolean; content: Attendance[] } | Error> {
     return await this.attendanceService.findAllByCounselor(
       id,
-      approved.approved,
+      pageable,
+      counseleeAttendanceFilter,
     );
   }
 

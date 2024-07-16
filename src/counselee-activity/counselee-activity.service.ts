@@ -67,14 +67,21 @@ export class CounseleeActivityService {
   async findAll(
     activitiesFilter: ActivitiesFilters,
     pageable: PageableDto,
-  ): Promise<{ Success: true; content: counseleeActivity[] } | Error> {
-    console.log(activitiesFilter);
+  ): Promise<{ Success: true; content: counseleeActivity[] } | Error | any> {
     try {
       const QueryBuilder = this.counseleeActivityRepository
         .createQueryBuilder('counselee-activity')
         .innerJoinAndSelect('counselee-activity.counselee', 'counselee')
-        .innerJoinAndSelect('counselee-activity.counselor', 'counselor')
-        .innerJoinAndSelect('counselee-activity.activity', 'activity');
+        .innerJoinAndSelect('counselee-activity.activity', 'activity')
+        .select([
+          'counselee-activity',
+          'counselee.id',
+          'counselee.firstName',
+          'counselee.lastName',
+          'counselee.phoneNumber',
+          'counselee.initiatedName',
+          'activity.name',
+        ]);
 
       if (activitiesFilter.firstName) {
         QueryBuilder.andWhere('counselee.firstName ILIKE :firstName', {
@@ -106,12 +113,22 @@ export class CounseleeActivityService {
           activityDate: `%${activitiesFilter.activityDate}%`,
         });
       }
-      const page = pageable.page || 1;
+      let page = pageable.page ? pageable.page : 0;
       const limit = pageable.size || 10;
-      QueryBuilder.skip((page - 1) * limit).take(limit);
+      const skip = page === 0 ? 0 : page * limit;
+      QueryBuilder.skip(skip).take(limit);
 
-      const response = await QueryBuilder.getMany();
-      return { Success: true, content: response };
+      const [response, total] = await QueryBuilder.getManyAndCount();
+      const totalPages = Math.ceil(Number(total) / limit);
+      return {
+        Success: true,
+        content: response,
+        total,
+        limit,
+        skip,
+        page,
+        totalPages,
+      };
     } catch (error) {
       console.log(error);
       throw error;
@@ -135,7 +152,21 @@ export class CounseleeActivityService {
         .innerJoinAndSelect('counselee-activity.counselee', 'counselee')
         .innerJoinAndSelect('counselee-activity.counselor', 'counselor')
         .innerJoinAndSelect('counselee-activity.activity', 'activity')
-        .where('counselor.id = :id', { id });
+        .where('counselor.id = :id', { id })
+        .select([
+          'counselee-activity',
+          'counselee.id',
+          'counselee.firstName',
+          'counselee.lastName',
+          'counselee.phoneNumber',
+          'counselee.initiatedName',
+          'counselor.id',
+          'counselor.firstName',
+          'counselor.lastName',
+          'counselor.phoneNumber',
+          'counselor.initiatedName',
+          'activity.name',
+        ]);
 
       if (activitiesFilter.firstName) {
         QueryBuilder.andWhere('counselee.firstName ILIKE :firstName', {
@@ -167,12 +198,22 @@ export class CounseleeActivityService {
           activityDate: `%${activitiesFilter.activityDate}`,
         });
       }
-      const page = pageable.page || 1;
+      let page = pageable.page ? pageable.page : 0;
       const limit = pageable.size || 10;
-      QueryBuilder.skip((page - 1) * limit).take(limit);
+      const skip = page === 0 ? 0 : page * limit;
+      QueryBuilder.skip(skip).take(limit);
 
       const [result, total] = await QueryBuilder.getManyAndCount();
-      return { Success: true, content: counseleeActivity };
+      const totalPages = Math.ceil(Number(total) / limit);
+      return {
+        Success: true,
+        content: result,
+        total,
+        limit,
+        skip,
+        page,
+        totalPages,
+      };
     } catch (error) {
       throw error;
     }

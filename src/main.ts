@@ -3,9 +3,11 @@ import { AppModule } from './app.module';
 import { setupSwagger } from './swagger-static/swagger';
 import { NextFunction, Request, Response } from 'express';
 import { AllExceptionsFilter } from './filters/AllException.filter';
+import { TypeOrmExceptionFilter } from './Utils/TypeOrmErrorsHandler';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.useGlobalFilters(new TypeOrmExceptionFilter());
   app.enableCors({
     origin: [
       'https://counselor-portal-main.vercel.app',

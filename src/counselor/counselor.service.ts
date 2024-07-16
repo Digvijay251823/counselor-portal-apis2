@@ -254,16 +254,14 @@ export class CounselorService {
           maritalStatus: counseleeFilter.maritalStatus,
         });
       }
-      let page = pageable.page || 1;
-      if (page < 1) {
-        page = 1;
-      }
+      let page = pageable.page ? pageable.page : 0;
       const limit = pageable.size || 10;
-      const skip = (pageable?.page > 0 ? Number(pageable.page) - 1 : 0) * limit;
-      query.skip((page - 1) * limit).take(limit);
+      const skip = page === 0 ? 0 : page * limit;
+
+      query.skip(skip).take(limit);
+
       const [counseleesList, total] = await query.getManyAndCount();
       const totalPages = Math.ceil(total / limit);
-
       return {
         Success: true,
         content: counseleesList,

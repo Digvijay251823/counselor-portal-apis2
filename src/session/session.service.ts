@@ -81,7 +81,6 @@ export class SessionService {
 
       const sessions = await this.sessionModel
         .createQueryBuilder('session')
-        .leftJoinAndSelect('session.course', 'course')
         .leftJoinAndSelect('session.counselor', 'counselor')
         .where('session.startTime > :fortyEightHoursAgo', {
           fortyEightHoursAgo,

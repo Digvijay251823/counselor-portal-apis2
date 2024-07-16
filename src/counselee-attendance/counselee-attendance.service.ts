@@ -4,6 +4,8 @@ import { Attendance } from 'src/Entities/Attendance.entity';
 import { Counselee } from 'src/Entities/Counselee.entity';
 import { Counselor } from 'src/Entities/Counselor.entity';
 import { CreateAttendanceDto } from 'src/Entities/DTOS/counseleeAttendance.dto';
+import { CounseleeAttendanceFilter } from 'src/Entities/DTOS/Filters/counselee-attendance.dto';
+import { PageableDto } from 'src/Entities/DTOS/pageable.dto';
 import { ScheduledSession } from 'src/Entities/ScheduledSession.entity';
 import { Repository } from 'typeorm';
 
@@ -58,6 +60,7 @@ export class CounseleeAttendanceService {
           scheduledSession: { id: scheduledSessionId },
           counselee: { id: counseleeId },
           counselor: { id: counselorId },
+          modeOfAttendance,
         },
       });
 
@@ -70,6 +73,7 @@ export class CounseleeAttendanceService {
       const attendance = this.attendanceRepository.create({
         ...createAttendanceDto,
         scheduledSession,
+        modeOfAttendance,
         counselee,
         counselor,
         approved: counselor.autoApprove,
@@ -97,24 +101,89 @@ export class CounseleeAttendanceService {
     }
   }
 
-  async findAllByCounselor(id: string, approved: boolean) {
+  async findAllByCounselor(
+    id: string,
+    pageable: PageableDto,
+    attendanceFilter: CounseleeAttendanceFilter,
+  ) {
     try {
-      const response = await this.attendanceRepository.find({
-        where: { counselor: { id: id }, approved: approved },
-        relations: ['counselor', 'counselee', 'scheduledSession'],
+      const query = this.attendanceRepository
+        .createQueryBuilder('counselee-attendance')
+        .leftJoinAndSelect('counselee-attendance.counselee', 'counselee')
+        .leftJoinAndSelect('counselee-attendance.counselor', 'counselor')
+        .leftJoinAndSelect(
+          'counselee-attendance.scheduledSession',
+          'scheduledSession',
+        )
+        .where('counselor.id=:id', { id })
+        .select([
+          'counselee-attendance',
+          'scheduledSession',
+          'counselee.id',
+          'counselee.firstName',
+          'counselee.lastName',
+          'counselee.initiatedName',
+          'counselee.phoneNumber',
+        ]);
+      if (attendanceFilter.firstName) {
+        query.andWhere('counselee.firstName ILIKE :firstName', {
+          firstName: `%${attendanceFilter.firstName}`,
+        });
+      }
+      if (attendanceFilter.lastName) {
+        query.andWhere('counselee.lastName ILIKE :lastName', {
+          lastName: `%${attendanceFilter.lastName}`,
+        });
+      }
+      if (attendanceFilter.phoneNumber) {
+        query.andWhere('counselee.phoneNumber ILIKE :phoneNumber', {
+          phoneNumber: `%${attendanceFilter.phoneNumber}`,
+        });
+      }
+      if (attendanceFilter.initiatedName) {
+        query.andWhere('counselee.initiatedName ILIKE :initiatedName', {
+          initiatedName: `%${attendanceFilter.initiatedName}`,
+        });
+      }
+      if (attendanceFilter.approved) {
+        query.where('approved=:approved', {
+          approved: attendanceFilter.approved,
+        });
+      }
+      if (attendanceFilter.startTime) {
+        query.andWhere('counselee-attendance.startTime = startTime', {
+          startTime: `%${attendanceFilter.startTime}`,
+        });
+      }
+      let page = pageable.page ? pageable.page : 0;
+      const limit = pageable.size || 10;
+      const skip = page === 0 ? 0 : page * limit;
+      query.skip(skip).take(limit);
+
+      const [response, total] = await query.getManyAndCount();
+      const approveFilter = await this.attendanceRepository.find({
+        where: { counselor: { id } },
       });
-      // Count approved true and false
-      const approvedTrueCount = response.filter(
+      const totalPages = Math.ceil(Number(total) / limit);
+      const approvedTrueCount = approveFilter.filter(
         (record) => record.approved === true,
       ).length;
-      const approvedFalseCount = response.filter(
+
+      const approvedFalseCount = approveFilter.filter(
         (record) => record.approved === false,
       ).length;
+
       return {
         Success: true,
         content: response,
         approvedRecordsCount: approvedTrueCount,
         pendingRecordsCount: approvedFalseCount,
+        total,
+        limit,
+        skip,
+        page,
+        elements: response.length,
+        totalPages,
       };
     } catch (error) {
       throw error;

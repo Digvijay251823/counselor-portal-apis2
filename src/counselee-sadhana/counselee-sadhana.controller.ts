@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { CounseleeSadhanaService } from './counselee-sadhana.service';
@@ -22,6 +23,9 @@ import { ApiResponseMessage } from 'src/Entities/DTOS/Success.dto';
 import { Role } from 'src/Entities/DTOS/role.enum';
 import { RolesGuard } from 'src/roles/roles.guard';
 import { Roles } from 'src/Entities/DTOS/Roles.dto';
+import { PageableDto } from 'src/Entities/DTOS/pageable.dto';
+import { CounseleeFilter } from 'src/Entities/DTOS/Filters/counselee.dto';
+import { CounseleeSadhanaFilter } from 'src/Entities/DTOS/Filters/sadhana.dto';
 
 @ApiTags('counselee-sadhana')
 @Controller('counselee-sadhana')
@@ -65,8 +69,16 @@ export class CounseleeSadhanaController {
 
   @ApiOperation({ summary: 'Get All Sadhana Entries Based on counselor id' })
   @Get('/counselor/:counselorid')
-  async findByCounselor(@Param('id') id: string) {
-    return this.SadhanaFormService.findByCounselor(id);
+  async findByCounselor(
+    @Param('counselorid') counselorid: string,
+    @Query() pageable: PageableDto,
+    @Query() counseleeFilter: CounseleeSadhanaFilter,
+  ) {
+    return this.SadhanaFormService.findByCounselor(
+      counselorid,
+      pageable,
+      counseleeFilter,
+    );
   }
 
   @Roles(Role.Counselor, Role.CCT)

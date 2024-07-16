@@ -2,6 +2,9 @@ import { HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Counselee } from 'src/Entities/Counselee.entity';
 import { Counselor } from 'src/Entities/Counselor.entity';
+import { CounseleeFilter } from 'src/Entities/DTOS/Filters/counselee.dto';
+import { CounseleeSadhanaFilter } from 'src/Entities/DTOS/Filters/sadhana.dto';
+import { PageableDto } from 'src/Entities/DTOS/pageable.dto';
 import { CreateSadhanaFormDto } from 'src/Entities/DTOS/sadhana.dto';
 import { SadhanaForm } from 'src/Entities/SadhanaForm.entity';
 import { Repository } from 'typeorm';
@@ -27,6 +30,7 @@ export class CounseleeSadhanaService {
       if (response.length === 0) {
         throw new HttpException('no sadhana entries to show', 404);
       }
+
       return { Success: true, content: response };
     } catch (error) {
       throw error;
@@ -90,7 +94,11 @@ export class CounseleeSadhanaService {
     }
   }
 
-  async findByCounselor(id: string) {
+  async findByCounselor(
+    id: string,
+    pageable: PageableDto,
+    counseleeFilter: CounseleeSadhanaFilter,
+  ) {
     try {
       const Counselor = await this.Counselor.findOne({
         where: { id: id },
@@ -98,12 +106,66 @@ export class CounseleeSadhanaService {
       if (!Counselor) {
         throw new HttpException('Counselor Not Found', 409);
       }
-      const SadhanaEntries = await this.SadhanaForm.find({
-        where: { counselor: { id } },
-        relations: ['counselee', 'counselor'],
-      });
 
-      return { Success: true, content: SadhanaEntries };
+      const query = this.SadhanaForm.createQueryBuilder('sadhana')
+        .leftJoinAndSelect('sadhana.counselee', 'counselee')
+        .leftJoinAndSelect('sadhana.counselor', 'counselor')
+        .where('counselor.id = :id', { id })
+        .select([
+          'sadhana',
+          'counselor.id',
+          'counselor.firstName',
+          'counselor.lastName',
+          'counselor.initiatedName',
+          'counselor.phoneNumber',
+          'counselee.id',
+          'counselee.firstName',
+          'counselee.lastName',
+          'counselee.initiatedName',
+          'counselee.phoneNumber',
+        ]);
+
+      if (counseleeFilter.firstName) {
+        query.andWhere('counselee.firstName ILIKE :firstName', {
+          firstName: `%${counseleeFilter.firstName}`,
+        });
+      }
+      if (counseleeFilter.lastName) {
+        query.andWhere('counselee.lastName ILIKE :lastName', {
+          lastName: `%${counseleeFilter.lastName}`,
+        });
+      }
+      if (counseleeFilter.phoneNumber) {
+        query.andWhere('counselee.phoneNumber ILIKE :phoneNumber', {
+          phoneNumber: `%${counseleeFilter.phoneNumber}`,
+        });
+      }
+      if (counseleeFilter.initiatedName) {
+        query.andWhere('counselee.initiatedName ILIKE :initiatedName', {
+          initiatedName: `%${counseleeFilter.initiatedName}`,
+        });
+      }
+      if (counseleeFilter.sadhanaDate) {
+        query.andWhere('sadhana.sadhanaDate ILIKE :sadhanaDate', {
+          sadhanaDate: `%${counseleeFilter.sadhanaDate}`,
+        });
+      }
+      let page = pageable.page ? pageable.page : 0;
+      const limit = pageable.size || 10;
+      const skip = page === 0 ? 0 : page * limit;
+      query.skip(skip).take(limit);
+      const [SadhanaEntries, total] = await query.getManyAndCount();
+      const totalPages = Math.ceil(Number(total) / limit);
+      return {
+        Success: true,
+        content: SadhanaEntries,
+        total,
+        limit,
+        skip,
+        page,
+        elements: SadhanaEntries.length,
+        totalPages,
+      };
     } catch (error) {
       throw error;
     }
@@ -119,7 +181,6 @@ export class CounseleeSadhanaService {
       }
       await this.SadhanaForm.delete(id);
       return { Success: true, message: 'Deleted Sadhana Successfully' };
-      return;
     } catch (error) {
       throw error;
     }
