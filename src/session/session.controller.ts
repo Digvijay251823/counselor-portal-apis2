@@ -6,6 +6,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { SessionService } from './session.service';
@@ -24,6 +25,7 @@ import { ApiResponseMessage } from 'src/Entities/DTOS/Success.dto';
 import { Role } from 'src/Entities/DTOS/role.enum';
 import { Roles } from 'src/Entities/DTOS/Roles.dto';
 import { RolesGuard } from 'src/roles/roles.guard';
+import { PageableDto } from 'src/Entities/DTOS/pageable.dto';
 
 @ApiTags('Session')
 @Controller('session')
@@ -64,8 +66,11 @@ export class SessionController {
   @Get('/counselor/:id')
   async ScheduledSessionCounselor(
     @Param('id') id: string,
-  ): Promise<{ Success: boolean; content: ScheduledSession[] } | Error> {
-    return this.sessionService.findOneBasedOnCounselor(id);
+    @Query() pageable: PageableDto,
+  ): Promise<
+    { Success: boolean; content: ScheduledSession[]; total: number } | Error
+  > {
+    return this.sessionService.findOneBasedOnCounselor(id, pageable);
   }
 
   @ApiOperation({

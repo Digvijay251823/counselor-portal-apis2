@@ -58,7 +58,7 @@ export class CounseleeAttendanceController {
   @ApiResponse({
     status: 200,
     description: 'Return all attendances',
-    type: [Attendance],
+    type: [CreateAttendanceDto],
   })
   async findAllByCounselor(
     @Query() pageable: PageableDto,

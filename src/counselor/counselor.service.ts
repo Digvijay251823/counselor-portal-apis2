@@ -312,7 +312,6 @@ export class CounselorService {
         total,
       };
     } catch (error) {
-      console.log(error);
       throw error;
     }
   }

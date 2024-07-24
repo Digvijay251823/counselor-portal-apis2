@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Counselee } from 'src/Entities/Counselee.entity';
 import { Counselor } from 'src/Entities/Counselor.entity';
 import { Course } from 'src/Entities/Course.entity';
+import { PageableDto } from 'src/Entities/DTOS/pageable.dto';
 import {
   CreateScheduledSessionDto,
   UpdateScheduledSessionDto,
@@ -55,16 +56,42 @@ export class SessionService {
 
   async findOneBasedOnCounselor(
     id: string,
-  ): Promise<{ Success: boolean; content: ScheduledSession[] } | Error> {
+    Pageable: PageableDto,
+  ): Promise<
+    | {
+        Success: boolean;
+        content: ScheduledSession[];
+        total: number;
+        limit: number;
+        element: number;
+        skiped: number;
+      }
+    | Error
+  > {
     try {
-      const response = await this.sessionModel.find({
+      let page = Pageable.page || 1;
+      if (page < 1) {
+        page = 1;
+      }
+      const limit = Pageable.size || 10;
+      const skip = (Pageable?.page > 0 ? Number(Pageable.page) - 1 : 0) * limit;
+
+      const [response, total] = await this.sessionModel.findAndCount({
         where: { counselor: { id: id } },
-        relations: ['counselor', 'course'],
+        skip: (page - 1) * limit,
+        take: limit,
       });
       if (!response) {
         throw new HttpException('no sessions found', 404);
       }
-      return { Success: true, content: response };
+      return {
+        Success: true,
+        content: response,
+        total,
+        limit: limit,
+        element: response.length,
+        skiped: skip,
+      };
     } catch (error) {
       throw error;
     }

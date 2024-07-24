@@ -127,27 +127,28 @@ export class CounseleeSadhanaService {
 
       if (counseleeFilter.firstName) {
         query.andWhere('counselee.firstName ILIKE :firstName', {
-          firstName: `%${counseleeFilter.firstName}`,
+          firstName: `%${counseleeFilter.firstName}%`,
         });
       }
       if (counseleeFilter.lastName) {
         query.andWhere('counselee.lastName ILIKE :lastName', {
-          lastName: `%${counseleeFilter.lastName}`,
+          lastName: `%${counseleeFilter.lastName}%`,
         });
       }
       if (counseleeFilter.phoneNumber) {
         query.andWhere('counselee.phoneNumber ILIKE :phoneNumber', {
-          phoneNumber: `%${counseleeFilter.phoneNumber}`,
+          phoneNumber: `%${counseleeFilter.phoneNumber}%`,
         });
       }
       if (counseleeFilter.initiatedName) {
         query.andWhere('counselee.initiatedName ILIKE :initiatedName', {
-          initiatedName: `%${counseleeFilter.initiatedName}`,
+          initiatedName: `%${counseleeFilter.initiatedName}%`,
         });
       }
-      if (counseleeFilter.sadhanaDate) {
-        query.andWhere('sadhana.sadhanaDate ILIKE :sadhanaDate', {
-          sadhanaDate: `%${counseleeFilter.sadhanaDate}`,
+      if (counseleeFilter.startDate && counseleeFilter.endDate) {
+        query.andWhere('sadhana.sadhanaDate BETWEEN :startDate AND :endDate', {
+          startDate: `%${counseleeFilter.startDate}%`,
+          endDate: `%${counseleeFilter.endDate}%`,
         });
       }
       let page = pageable.page ? pageable.page : 0;

@@ -170,32 +170,32 @@ export class CounseleeActivityService {
 
       if (activitiesFilter.firstName) {
         QueryBuilder.andWhere('counselee.firstName ILIKE :firstName', {
-          firstName: `%${activitiesFilter.firstName}`,
+          firstName: `%${activitiesFilter.firstName}%`,
         });
       }
       if (activitiesFilter.lastName) {
         QueryBuilder.andWhere('counselee.lastName ILIKE :lastName', {
-          lastName: `%${activitiesFilter.lastName}`,
+          lastName: `%${activitiesFilter.lastName}%`,
         });
       }
       if (activitiesFilter.phoneNumber) {
         QueryBuilder.andWhere('counselee.phoneNumber ILIKE :phoneNumber', {
-          phoneNumber: `%${activitiesFilter.phoneNumber}`,
+          phoneNumber: `%${activitiesFilter.phoneNumber}%`,
         });
       }
       if (activitiesFilter.initiatedName) {
         QueryBuilder.andWhere('counselee.initiatedName ILIKE :initiatedName', {
-          initiatedName: `%${activitiesFilter.initiatedName}`,
+          initiatedName: `%${activitiesFilter.initiatedName}%`,
         });
       }
       if (activitiesFilter.activityName) {
         QueryBuilder.andWhere('activity.name ILIKE :activityName', {
-          activityName: `%${activitiesFilter.activityName}`,
+          activityName: `%${activitiesFilter.activityName}%`,
         });
       }
       if (activitiesFilter.activityDate) {
         QueryBuilder.andWhere('activity.activityDate ILIKE :activityDate', {
-          activityDate: `%${activitiesFilter.activityDate}`,
+          activityDate: `%${activitiesFilter.activityDate}%`,
         });
       }
       let page = pageable.page ? pageable.page : 0;

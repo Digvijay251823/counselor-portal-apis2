@@ -125,34 +125,35 @@ export class CounseleeAttendanceService {
           'counselee.initiatedName',
           'counselee.phoneNumber',
         ]);
-      if (attendanceFilter.firstName) {
-        query.andWhere('counselee.firstName ILIKE :firstName', {
-          firstName: `%${attendanceFilter.firstName}`,
-        });
-      }
-      if (attendanceFilter.lastName) {
-        query.andWhere('counselee.lastName ILIKE :lastName', {
-          lastName: `%${attendanceFilter.lastName}`,
-        });
-      }
-      if (attendanceFilter.phoneNumber) {
-        query.andWhere('counselee.phoneNumber ILIKE :phoneNumber', {
-          phoneNumber: `%${attendanceFilter.phoneNumber}`,
-        });
-      }
-      if (attendanceFilter.initiatedName) {
-        query.andWhere('counselee.initiatedName ILIKE :initiatedName', {
-          initiatedName: `%${attendanceFilter.initiatedName}`,
-        });
-      }
-      if (attendanceFilter.approved) {
-        query.where('approved=:approved', {
-          approved: attendanceFilter.approved,
+      if (attendanceFilter.approvedstate) {
+        query.where('counselee-attendance.approved  =:approved', {
+          approved:
+            attendanceFilter.approvedstate === 'approved' ? true : false,
         });
       }
       if (attendanceFilter.startTime) {
         query.andWhere('counselee-attendance.startTime = startTime', {
-          startTime: `%${attendanceFilter.startTime}`,
+          startTime: `%${attendanceFilter.startTime}%`,
+        });
+      }
+      if (attendanceFilter.firstName) {
+        query.andWhere('counselee.firstName ILIKE :firstName', {
+          firstName: `%${attendanceFilter.firstName}%`,
+        });
+      }
+      if (attendanceFilter.lastName) {
+        query.andWhere('counselee.lastName ILIKE :lastName', {
+          lastName: `%${attendanceFilter.lastName}%`,
+        });
+      }
+      if (attendanceFilter.phoneNumber) {
+        query.andWhere('counselee.phoneNumber ILIKE :phoneNumber', {
+          phoneNumber: `%${attendanceFilter.phoneNumber}%`,
+        });
+      }
+      if (attendanceFilter.initiatedName) {
+        query.andWhere('counselee.initiatedName ILIKE :initiatedName', {
+          initiatedName: `%${attendanceFilter.initiatedName}%`,
         });
       }
       let page = pageable.page ? pageable.page : 0;
@@ -163,6 +164,7 @@ export class CounseleeAttendanceService {
       const [response, total] = await query.getManyAndCount();
       const approveFilter = await this.attendanceRepository.find({
         where: { counselor: { id } },
+        select: ['approved'],
       });
       const totalPages = Math.ceil(Number(total) / limit);
       const approvedTrueCount = approveFilter.filter(

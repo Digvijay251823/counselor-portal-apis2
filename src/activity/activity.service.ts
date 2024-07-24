@@ -12,11 +12,8 @@ export class ActivityService {
   ) {}
   async getAllActivities() {
     try {
-      const response = await this.activitiesModel.find();
-      if (response.length === 0) {
-        throw new HttpException('No activity to show', 404);
-      }
-      return { Success: true, content: response };
+      const [response, total] = await this.activitiesModel.findAndCount();
+      return { Success: true, content: response, total };
     } catch (error) {
       throw error;
     }

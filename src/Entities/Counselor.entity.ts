@@ -50,10 +50,8 @@ export class Counselor {
   chantingRounds: number;
   @Column({ nullable: true })
   chantingStartedThisRoundsDate: Date;
-
   @Column({ nullable: true })
   yourInitiatingSpiritualMaster: string;
-
   @Column({ nullable: true })
   harinamInitiationDate: Date;
   @Column({ default: 'counselor' })
@@ -64,6 +62,8 @@ export class Counselor {
   children: JSON;
   @Column({ default: true })
   autoApprove: boolean;
+  @Column({ default: 2 })
+  sessionExpirationTime: number;
   @CreateDateColumn()
   createdAt: Date;
   @UpdateDateColumn()
