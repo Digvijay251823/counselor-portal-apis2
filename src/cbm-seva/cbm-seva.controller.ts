@@ -11,6 +11,8 @@ import { CbmSevaService } from './cbm-seva.service';
 import { ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateCBMSevaDto } from 'src/Entities/DTOS/cbmseva.dto';
 import { ApiResponseMessage } from 'src/Entities/DTOS/Success.dto';
+import { CBMSevaFilter } from 'src/Entities/DTOS/Filters/cbmSeva.dto';
+import { PageableDto } from 'src/Entities/DTOS/pageable.dto';
 
 @ApiTags('cbm-seva')
 @Controller('cbm-seva')
@@ -24,31 +26,12 @@ export class CbmSevaController {
   }
 
   @ApiResponse({ type: [CreateCBMSevaDto], status: 200 })
-  @ApiQuery({ name: 'startDate', required: false })
-  @ApiQuery({ name: 'endDate', required: false })
-  @ApiQuery({ name: 'counselorContactNumber', required: false })
-  @ApiQuery({ name: 'page', required: false })
-  @ApiQuery({ name: 'limit', required: false })
   @Get('/')
   async findAll(
-    @Query('startDate') startDate?: string,
-    @Query('endDate') endDate?: string,
-    @Query('counselorContactNumber') counselorContactNumber?: string,
-    @Query('page') page?: number,
-    @Query('limit') limit?: number,
-    @Query('sortField') sortField?: string,
-    @Query('sortOrder') sortOrder?: 'ASC' | 'DESC',
+    @Query() cbmSevaFilter: CBMSevaFilter,
+    @Query() pageable: PageableDto,
   ) {
-    const filters = {
-      startDate,
-      endDate,
-      counselorContactNumber,
-      page,
-      limit,
-      sortField,
-      sortOrder,
-    };
-    return await this.cbmSevaService.findAll(filters);
+    return await this.cbmSevaService.findAll(pageable, cbmSevaFilter);
   }
 
   @ApiResponse({ type: CreateCBMSevaDto, status: 200 })

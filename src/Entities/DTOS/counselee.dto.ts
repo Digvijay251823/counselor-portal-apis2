@@ -37,7 +37,7 @@ export class CounseleeSchema {
   @ApiProperty()
   connectedToCounselorSinceYear: Date;
   @ApiProperty()
-  husband: string;
+  spouce: string;
   @ApiProperty({ type: () => [childrenSchema] })
   children: childrenSchema[];
 }

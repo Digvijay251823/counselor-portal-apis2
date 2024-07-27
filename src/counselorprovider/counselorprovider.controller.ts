@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { CounselorproviderService } from './counselorprovider.service';
 import {
   ApiBody,
@@ -14,6 +22,8 @@ import { CounselorProviderEntity } from 'src/Entities/CounselorProvider.entity';
 import { Roles } from 'src/Entities/DTOS/Roles.dto';
 import { RolesGuard } from 'src/roles/roles.guard';
 import { Role } from 'src/Entities/DTOS/role.enum';
+import { PageableDto } from 'src/Entities/DTOS/pageable.dto';
+import { counselorProviderFilter } from 'src/Entities/DTOS/Filters/counselorProvider.dto';
 
 @ApiTags('counselor-provider')
 @Controller('counselorprovider')
@@ -27,37 +37,15 @@ export class CounselorproviderController {
     description: 'List of all Submissions',
     type: CounselorProviderSchema,
   })
-  @ApiQuery({
-    name: 'page',
-    required: false,
-    type: Number,
-    description: 'Page number',
-    example: 1,
-  })
-  @ApiQuery({
-    name: 'limit',
-    required: false,
-    type: Number,
-    description: 'Page size',
-    example: 10,
-  })
-  @ApiQuery({
-    name: 'sortBy',
-    required: false,
-    type: String,
-    description: 'Field to sort by',
-    example: 'createdAt',
-  })
-  @ApiQuery({
-    name: 'sortOrder',
-    required: false,
-    enum: ['ASC', 'DESC'],
-    description: 'Sort order',
-    example: 'ASC',
-  })
   @Get('/')
-  async getAll() {
-    return await this.counselorProviderService.getAll();
+  async getAll(
+    @Query() pageable: PageableDto,
+    @Query() counselorProviderFilter: counselorProviderFilter,
+  ) {
+    return await this.counselorProviderService.getAll(
+      pageable,
+      counselorProviderFilter,
+    );
   }
 
   @ApiOperation({ summary: 'submit the form for change counselor' })

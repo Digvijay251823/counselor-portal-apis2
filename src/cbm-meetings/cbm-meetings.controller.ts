@@ -6,12 +6,15 @@ import {
   Param,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import { CbmMeetingsService } from './cbm-meetings.service';
 import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateCBMMeeting } from 'src/Entities/DTOS/cbmmeeting.dto';
 import { CBMMeeting } from 'src/Entities/CBMMeetings.entity';
 import { ApiResponseMessage } from 'src/Entities/DTOS/Success.dto';
+import { PageableDto } from 'src/Entities/DTOS/pageable.dto';
+import { CbmMeetingFilter } from 'src/Entities/DTOS/Filters/cbmMeetings.dto';
 
 @ApiTags('CBM Meetings')
 @Controller('cbm-meetings')
@@ -31,8 +34,11 @@ export class CbmMeetingsController {
     description: 'get all scheduled meetings',
   })
   @Get('/')
-  async findAll() {
-    return this.cbmService.findAll();
+  async findAll(
+    @Query() pageable: PageableDto,
+    @Query() cbmMeetingFilter: CbmMeetingFilter,
+  ) {
+    return this.cbmService.findAll(pageable, cbmMeetingFilter);
   }
 
   @ApiResponse({

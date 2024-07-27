@@ -30,6 +30,7 @@ import { Role } from 'src/Entities/DTOS/role.enum';
 import { Roles } from 'src/Entities/DTOS/Roles.dto';
 import { CounseleeFilter } from 'src/Entities/DTOS/Filters/counselee.dto';
 import { PageableDto } from 'src/Entities/DTOS/pageable.dto';
+import { cctCounselorFilter } from 'src/Entities/DTOS/Filters/cctCounselor.dto';
 
 @ApiTags('Counselee')
 @Controller('counselee')
@@ -40,7 +41,7 @@ export class CounseleeController {
   @Get('/')
   async getCounselee(
     @Query() pageable: PageableDto,
-    @Query() filtersCounselee: CounseleeFilter,
+    @Query() filtersCounselee: cctCounselorFilter,
   ) {
     return this.counseleeService.getCounselee(pageable, filtersCounselee);
   }

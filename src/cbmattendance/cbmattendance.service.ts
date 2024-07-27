@@ -4,6 +4,8 @@ import { CBMAttendance } from 'src/Entities/CBMAttendance.entity';
 import { CBMMeeting } from 'src/Entities/CBMMeetings.entity';
 import { Counselor } from 'src/Entities/Counselor.entity';
 import { CreateCBMAttendanceDto } from 'src/Entities/DTOS/cbmattendance.dto';
+import { CbmAttendanceFilter } from 'src/Entities/DTOS/Filters/cbmattendance.dto';
+import { PageableDto } from 'src/Entities/DTOS/pageable.dto';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -54,12 +56,87 @@ export class CbmattendanceService {
     }
   }
 
-  async findAll() {
+  async findAll(
+    pageable: PageableDto,
+    cbmAttendanceFilter: CbmAttendanceFilter,
+  ) {
     try {
-      const attendance = await this.cbmAttendanceRepository.find({
-        relations: ['counselor', 'cbmMeeting'],
-      });
-      return { Success: true, content: attendance };
+      const queryBuilder = this.cbmAttendanceRepository
+        .createQueryBuilder('cbmattendance')
+        .leftJoinAndSelect('cbmattendance.cbmMeeting', 'cbmMeeting')
+        .leftJoinAndSelect('cbmattendance.counselor', 'counselor')
+        .select([
+          'cbmattendance',
+          'counselor.firstName',
+          'counselor.lastName',
+          'counselor.initiatedName',
+          'counselor.phoneNumber',
+          'cbmMeeting',
+        ]);
+
+      if (cbmAttendanceFilter.firstName) {
+        queryBuilder.andWhere('counselor.firstName ILIKE :firstName', {
+          firstName: `%${cbmAttendanceFilter.firstName}%`,
+        });
+      }
+      if (cbmAttendanceFilter.lastName) {
+        queryBuilder.andWhere('counselor.lastName ILIKE :lastName', {
+          lastName: `%${cbmAttendanceFilter.lastName}%`,
+        });
+      }
+      if (cbmAttendanceFilter.phoneNumber) {
+        queryBuilder.andWhere('counselor.phoneNumber ILIKE :phoneNumber', {
+          phoneNumber: `%${cbmAttendanceFilter.phoneNumber}%`,
+        });
+      }
+      if (cbmAttendanceFilter.initiatedName) {
+        queryBuilder.andWhere('counselor.initiatedName ILIKE :initiatedName', {
+          initiatedName: `%${cbmAttendanceFilter.initiatedName}%`,
+        });
+      }
+      if (cbmAttendanceFilter.startTime) {
+        queryBuilder.andWhere('cbmMeeting.startTime =:startTime', {
+          startTime: `%${cbmAttendanceFilter.startTime}%`,
+        });
+      }
+      if (cbmAttendanceFilter.modeOfAttendance) {
+        queryBuilder.andWhere(
+          'cbmattendance.modeOfAttendance =:modeOfAttendance',
+          {
+            modeOfAttendance: cbmAttendanceFilter.modeOfAttendance,
+          },
+        );
+      }
+      if (cbmAttendanceFilter.isRsvp) {
+        queryBuilder.where('cbmattendance.isRSVP  =:isRsvp', {
+          isRsvp: cbmAttendanceFilter.isRsvp === 'YES' ? true : false,
+        });
+      }
+      if (cbmAttendanceFilter.startDate && cbmAttendanceFilter.endDate) {
+        queryBuilder.andWhere(
+          'cbmattendance.createdAt BETWEEN :startDate AND :endDate',
+          {
+            startDate: `%${cbmAttendanceFilter.startDate}%`,
+            endDate: `%${cbmAttendanceFilter.endDate}%`,
+          },
+        );
+      }
+      let page = pageable.page ? pageable.page : 0;
+      const limit = pageable.size || 10;
+      const skip = page === 0 ? 0 : page * limit;
+      queryBuilder.skip(skip).take(limit);
+      const [attendance, total] = await queryBuilder.getManyAndCount();
+      const totalPages = Math.ceil(Number(total) / limit);
+
+      return {
+        Success: true,
+        content: attendance,
+        total,
+        limit,
+        skip,
+        page,
+        totalPages,
+      };
     } catch (error) {
       throw error;
     }

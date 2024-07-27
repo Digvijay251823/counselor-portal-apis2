@@ -19,9 +19,9 @@ export class CounselorService {
   ) {}
   async getCounselor(pageable: PageableDto, counselorFilter: CounselorFilter) {
     try {
-      const query = this.CounselorRepository.createQueryBuilder('counselor')
-        .leftJoinAndSelect('counselor.spouce', 'spouce')
-        .leftJoinAndSelect('counselor.husband', 'husband');
+      const query = this.CounselorRepository.createQueryBuilder(
+        'counselor',
+      ).leftJoinAndSelect('counselor.spouce', 'spouce');
       if (counselorFilter.firstName) {
         query.andWhere('counselor.firstName ILIKE :firstName', {
           firstName: `%${counselorFilter.firstName}%`,
@@ -44,7 +44,7 @@ export class CounselorService {
       }
       if (counselorFilter.gender) {
         query.andWhere('counselor.gender ILIKE :gender', {
-          gender: `%${counselorFilter.gender}%`,
+          gender: counselorFilter.gender,
         });
       }
       if (counselorFilter.maritalStatus) {

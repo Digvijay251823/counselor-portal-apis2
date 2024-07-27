@@ -3,6 +3,8 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Counselee } from 'src/Entities/Counselee.entity';
 import { CounselorProviderEntity } from 'src/Entities/CounselorProvider.entity';
+import { counselorProviderFilter } from 'src/Entities/DTOS/Filters/counselorProvider.dto';
+import { PageableDto } from 'src/Entities/DTOS/pageable.dto';
 
 import { Repository } from 'typeorm';
 
@@ -15,21 +17,109 @@ export class CounselorproviderService {
     private readonly counseleeService: Repository<Counselee>,
   ) {}
 
-  async getAll() {
+  async getAll(
+    pageable: PageableDto,
+    counselorProviderFilter: counselorProviderFilter,
+  ) {
     try {
-      const Submissions = await this.counselorProvider.find({
-        relations: [
-          'counselee',
+      const queryBuilder = this.counselorProvider
+        .createQueryBuilder('counselorProvider')
+        .leftJoinAndSelect('counselorProvider.counselee', 'counselee')
+        .leftJoinAndSelect(
+          'counselorProvider.preferedCounselor1',
           'preferedCounselor1',
+        )
+        .leftJoinAndSelect(
+          'counselorProvider.preferedCounselor2',
           'preferedCounselor2',
+        )
+        .leftJoinAndSelect(
+          'counselorProvider.preferedCounselor3',
           'preferedCounselor3',
-        ],
-      });
-      if (Submissions.length === 0) {
-        throw new HttpException('no submissions to show', HttpStatus.NOT_FOUND);
+        )
+        .select([
+          'counselorProvider',
+          'counselee.firstName',
+          'counselee.lastName',
+          'counselee.phoneNumber',
+          'counselee.initiatedName',
+          'preferedCounselor1.initiatedName',
+          'preferedCounselor1.firstName',
+          'preferedCounselor1.lastName',
+          'preferedCounselor2.initiatedName',
+          'preferedCounselor2.firstName',
+          'preferedCounselor2.lastName',
+          'preferedCounselor3.initiatedName',
+          'preferedCounselor3.firstName',
+          'preferedCounselor3.lastName',
+        ]);
+      if (counselorProviderFilter.firstName) {
+        queryBuilder.andWhere('counselee.firstName ILIKE :firstName', {
+          firstName: `%${counselorProviderFilter.firstName}%`,
+        });
       }
-      return { Success: true, content: Submissions };
+      if (counselorProviderFilter.lastName) {
+        queryBuilder.andWhere('counselee.lastName ILIKE :lastName', {
+          lastName: `%${counselorProviderFilter.lastName}%`,
+        });
+      }
+      if (counselorProviderFilter.phoneNumber) {
+        queryBuilder.andWhere('counselee.phoneNumber ILIKE :phoneNumber', {
+          phoneNumber: `%${counselorProviderFilter.phoneNumber}%`,
+        });
+      }
+      if (counselorProviderFilter.initiatedName) {
+        queryBuilder.andWhere('counselee.initiatedName ILIKE :initiatedName', {
+          initiatedName: `%${counselorProviderFilter.initiatedName}%`,
+        });
+      }
+      if (counselorProviderFilter.statusOfChange) {
+        queryBuilder.andWhere(
+          'counselorProvider.statusOfChange =:statusOfChange',
+          {
+            statusOfChange: counselorProviderFilter.statusOfChange,
+          },
+        );
+      }
+      if (counselorProviderFilter.alreadySpokenToExistingCounselor) {
+        queryBuilder.andWhere(
+          'counselorProvider.alreadySpokenToExistingCounselor =:alreadySpokenToExistingCounselor',
+          {
+            alreadySpokenToExistingCounselor:
+              counselorProviderFilter.alreadySpokenToExistingCounselor === 'YES'
+                ? true
+                : false,
+          },
+        );
+      }
+      if (counselorProviderFilter.alreadySpokenToNewCounselor) {
+        queryBuilder.andWhere(
+          'counselorProvider.alreadySpokenToNewCounselor =:alreadySpokenToNewCounselor',
+          {
+            alreadySpokenToNewCounselor:
+              counselorProviderFilter.alreadySpokenToNewCounselor === 'YES'
+                ? true
+                : false,
+          },
+        );
+      }
+      let page = pageable.page ? pageable.page : 0;
+      const limit = pageable.size || 10;
+      const skip = page === 0 ? 0 : page * limit;
+      queryBuilder.skip(skip).take(limit);
+      const [Submissions, total] = await queryBuilder.getManyAndCount();
+      const totalPages = Math.ceil(Number(total) / limit);
+      return {
+        Success: true,
+        content: Submissions,
+        total,
+        limit,
+        skip,
+        page,
+        totalPages,
+      };
     } catch (error) {
+      console.log(error);
       throw error;
     }
   }

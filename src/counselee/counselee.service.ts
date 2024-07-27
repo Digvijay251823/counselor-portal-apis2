@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 
 import { Counselee } from 'src/Entities/Counselee.entity';
 import { Counselor } from 'src/Entities/Counselor.entity';
+import { cctCounselorFilter } from 'src/Entities/DTOS/Filters/cctCounselor.dto';
 import { CounseleeFilter } from 'src/Entities/DTOS/Filters/counselee.dto';
 import { PageableDto } from 'src/Entities/DTOS/pageable.dto';
 import { Repository } from 'typeorm';
@@ -16,12 +17,47 @@ export class CounseleeService {
     private readonly CounselorModel: Repository<Counselor>,
   ) {}
 
-  async getCounselee(pageable: PageableDto, filtersCounselee: CounseleeFilter) {
+  async getCounselee(
+    pageable: PageableDto,
+    filtersCounselee: cctCounselorFilter,
+  ) {
     try {
       const queryBuilder = this.CounseleeModel.createQueryBuilder('counselee')
         .leftJoinAndSelect('counselee.spouce', 'spouce')
-        .leftJoinAndSelect('counselee.currentCounselor', 'currentCounselor');
+        .leftJoinAndSelect('counselee.currentCounselor', 'currentCounselor')
+        .select([
+          'counselee',
+          'spouce.firstName',
+          'spouce.lastName',
+          'spouce.phoneNumber',
+          'spouce.initiatedName',
+          'currentCounselor.initiatedName',
+        ]);
 
+      if (filtersCounselee.gender) {
+        queryBuilder.andWhere('counselee.gender = :gender', {
+          gender: filtersCounselee.gender,
+        });
+      }
+      if (filtersCounselee.maritalStatus) {
+        queryBuilder.andWhere('counselee.maritalStatus = :maritalStatus', {
+          maritalStatus: filtersCounselee.maritalStatus,
+        });
+      }
+
+      if (filtersCounselee.counselorInitiatedName) {
+        queryBuilder.andWhere(
+          'currentCounselor.initiatedName ILIKE :initiatedName',
+          {
+            initiatedName: `%${filtersCounselee.counselorInitiatedName}%`,
+          },
+        );
+      }
+      if (filtersCounselee.initiatedName) {
+        queryBuilder.andWhere('counselee.initiatedName ILIKE :initiatedName', {
+          initiatedName: `%${filtersCounselee.initiatedName}%`,
+        });
+      }
       if (filtersCounselee.firstName) {
         queryBuilder.andWhere('counselee.firstName ILIKE :firstName', {
           firstName: `%${filtersCounselee.firstName}%`,
@@ -37,41 +73,25 @@ export class CounseleeService {
           phoneNumber: `%${filtersCounselee.phoneNumber}%`,
         });
       }
-      if (filtersCounselee.initiatedName) {
-        queryBuilder.andWhere('counselee.initiatedName ILIKE :initiatedName', {
-          initiatedName: `%${filtersCounselee.initiatedName}%`,
-        });
-      }
-      if (filtersCounselee.gender) {
-        queryBuilder.andWhere('counselee.gender = :gender', {
-          gender: filtersCounselee.gender,
-        });
-      }
-      if (filtersCounselee.maritalStatus) {
-        queryBuilder.andWhere('counselee.maritalStatus = :maritalStatus', {
-          maritalStatus: filtersCounselee.maritalStatus,
-        });
-      }
 
-      let page = pageable.page || 1;
-      if (page < 1) {
-        page = 1;
-      }
+      let page = pageable.page ? pageable.page : 0;
       const limit = pageable.size || 10;
-      const skip = (pageable?.page > 0 ? Number(pageable.page) - 1 : 0) * limit;
-      queryBuilder.skip((page - 1) * limit).take(limit);
+      const skip = page === 0 ? 0 : page * limit;
+      queryBuilder.skip(skip).take(limit);
       const [result, total] = await queryBuilder.getManyAndCount();
-
+      const totalPages = Math.ceil(total / limit);
       return {
         Success: true,
         content: result,
         total: total,
-        page: page,
+        page: pageable.page,
         limit: limit,
         element: result.length,
+        totalPages,
         skipped: skip,
       };
     } catch (error) {
+      console.log(error);
       throw error;
     }
   }

@@ -3,10 +3,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CBMMeeting } from 'src/Entities/CBMMeetings.entity';
 import { CBMSeva } from 'src/Entities/CBMSeva.entity';
 import { Counselor } from 'src/Entities/Counselor.entity';
-import {
-  CreateCBMSevaDto,
-  UpdateCBMSevaDto,
-} from 'src/Entities/DTOS/cbmseva.dto';
+import { CreateCBMSevaDto } from 'src/Entities/DTOS/cbmseva.dto';
+import { CBMSevaFilter } from 'src/Entities/DTOS/Filters/cbmSeva.dto';
+import { PageableDto } from 'src/Entities/DTOS/pageable.dto';
 import { Between, Repository } from 'typeorm';
 
 @Injectable()
@@ -37,42 +36,91 @@ export class CbmSevaService {
     }
   }
 
-  async findAll(filters: {
-    startDate?: string;
-    endDate?: string;
-    counselorContactNumber?: string;
-    page?: number;
-    limit?: number;
-    sortField?: string;
-    sortOrder?: 'ASC' | 'DESC';
-  }) {
+  async findAll(pageable: PageableDto, cbmSevaFilter: CBMSevaFilter) {
     try {
-      const {
-        startDate,
-        endDate,
-        counselorContactNumber,
-        page = 1,
-        limit = 10,
-        sortField = 'startTime',
-        sortOrder = 'ASC',
-      } = filters;
+      const queryBuilder = this.CBMSeva.createQueryBuilder('cbm-seva')
+        .leftJoinAndSelect('cbm-seva.counselor', 'counselor')
+        .select([
+          'cbm-seva',
+          'counselor.firstName',
+          'counselor.lastName',
+          'counselor.initiatedName',
+          'counselor.phoneNumber',
+          'counselor.maritalStatus',
+        ]);
 
-      const where = {};
-      if (startDate && endDate) {
-        where['startTime'] = Between(new Date(startDate), new Date(endDate));
+      if (cbmSevaFilter.created) {
+        queryBuilder.andWhere('cbm-seva.createdAt =:createdAt', {
+          createdAt: cbmSevaFilter.created,
+        });
       }
-      if (counselorContactNumber) {
-        where['counselor'] = { contactNumber: counselorContactNumber };
+      if (cbmSevaFilter.seva === 'mangalAarti') {
+        queryBuilder.andWhere('cbm-seva.mangalAarti =:mangalAarti', {
+          mangalAarti: true,
+        });
+      }
+      if (cbmSevaFilter.seva === 'guruPuja') {
+        queryBuilder.andWhere('cbm-seva.guruPuja =:guruPuja', {
+          guruPuja: true,
+        });
+      }
+      if (cbmSevaFilter.seva === 'deityWorshipSeva') {
+        queryBuilder.andWhere('cbm-seva.deityWorshipSeva =:deityWorshipSeva', {
+          deityWorshipSeva: true,
+        });
+      }
+      if (cbmSevaFilter.seva === 'morningJapa') {
+        queryBuilder.andWhere('cbm-seva.morningJapa =:morningJapa', {
+          morningJapa: true,
+        });
+      }
+      if (cbmSevaFilter.seva === 'sbClass') {
+        queryBuilder.andWhere('cbm-seva.sbClass =:sbClass', {
+          sbClass: true,
+        });
+      }
+      if (cbmSevaFilter.seva === 'otherSeva') {
+        queryBuilder.andWhere('cbm-seva.otherSeva =:otherSeva', {
+          otherSeva: true,
+        });
       }
 
-      const [result, total] = await this.CBMSeva.findAndCount({
-        where,
-        skip: (page - 1) * limit,
-        take: limit,
-        order: { [sortField]: sortOrder },
-        relations: ['counselor'],
-      });
-      return { Success: true, content: result, total, page, limit };
+      if (cbmSevaFilter.firstName) {
+        queryBuilder.andWhere('counselor.firstName ILIKE :firstName', {
+          firstName: `%${cbmSevaFilter.firstName}%`,
+        });
+      }
+      if (cbmSevaFilter.lastName) {
+        queryBuilder.andWhere('counselor.lastName ILIKE :lastName', {
+          lastName: `%${cbmSevaFilter.lastName}%`,
+        });
+      }
+      if (cbmSevaFilter.phoneNumber) {
+        queryBuilder.andWhere('counselor.phoneNumber ILIKE :phoneNumber', {
+          phoneNumber: `%${cbmSevaFilter.phoneNumber}%`,
+        });
+      }
+      if (cbmSevaFilter.initiatedName) {
+        queryBuilder.andWhere('counselor.initiatedName ILIKE :initiatedName', {
+          initiatedName: `%${cbmSevaFilter.initiatedName}%`,
+        });
+      }
+
+      let page = pageable.page ? pageable.page : 0;
+      const limit = pageable.size || 10;
+      const skip = page === 0 ? 0 : page * limit;
+      queryBuilder.skip(skip).take(limit);
+      const [result, total] = await queryBuilder.getManyAndCount();
+      const totalPages = Math.ceil(Number(total) / limit);
+      return {
+        Success: true,
+        content: result,
+        total,
+        limit,
+        skip,
+        page,
+        totalPages,
+      };
     } catch (error) {
       throw error;
     }
