@@ -154,8 +154,15 @@ export class CounseleeSadhanaService {
       let page = pageable.page ? pageable.page : 0;
       const limit = pageable.size || 10;
       const skip = page === 0 ? 0 : page * limit;
-      query.skip(skip).take(limit);
+      query
+        .skip(skip)
+        .take(limit)
+        .orderBy(
+          `${pageable?.sort ? pageable?.sort : 'sadhana.sadhanaDate'}`,
+          'DESC',
+        );
       const [SadhanaEntries, total] = await query.getManyAndCount();
+
       const totalPages = Math.ceil(Number(total) / limit);
       return {
         Success: true,
@@ -168,6 +175,7 @@ export class CounseleeSadhanaService {
         totalPages,
       };
     } catch (error) {
+      console.log(error);
       throw error;
     }
   }

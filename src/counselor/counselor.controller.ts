@@ -145,4 +145,9 @@ export class CounselorController {
   async getCounseleeByCounselorDropDown(@Param('id') id: string) {
     return this.counselorService.getCounseleeByCounselorDropDown(id);
   }
+  @Get('/get/settings/:id')
+  @ApiOperation({ summary: 'get counselor settings' })
+  async getSettings(@Param('id') id: string) {
+    return this.counselorService.getSettings(id);
+  }
 }

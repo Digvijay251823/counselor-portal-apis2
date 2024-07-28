@@ -315,4 +315,23 @@ export class CounselorService {
       throw error;
     }
   }
+  //manage settings
+  async getSettings(counselorid: string) {
+    try {
+      const counselor = await this.CounselorRepository.findOne({
+        where: { id: counselorid },
+      });
+      if (!counselor) {
+        throw new HttpException('Counselor Not Found', 404);
+      }
+      const settings = {
+        autoApprove: counselor.autoApprove,
+        sessionExpiration: counselor.sessionExpirationTime,
+      };
+
+      return { Success: true, settings };
+    } catch (error) {
+      throw error;
+    }
+  }
 }

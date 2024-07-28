@@ -68,26 +68,20 @@ export class CounselorUpdateDto {
 
   @ApiProperty()
   email?: string;
-
   @ApiProperty()
   password?: string;
-
   @ApiProperty()
   maritalStatus?: string;
-
   @ApiProperty()
   husbandId?: string;
-
   @ApiProperty()
   address?: string;
-
   @ApiProperty()
   profession?: string;
   @ApiProperty()
   chantingRounds?: number;
   @ApiProperty()
   chantingStartedThisRoundsDate?: Date;
-
   @ApiProperty()
   yourInitiatingSpiritualMaster?: string;
   @ApiProperty()
@@ -98,6 +92,8 @@ export class CounselorUpdateDto {
   harinamInitiationPlace?: string;
   @ApiProperty()
   autoApprove?: boolean;
+  @ApiProperty({ example: 2 })
+  sessionExpirationTime?: number;
   @ApiProperty()
   children?: JSON;
 }
