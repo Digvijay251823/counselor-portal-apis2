@@ -115,7 +115,6 @@ export class SessionService {
         .andWhere('session.startTime <= :currentTime', { currentTime })
         .andWhere('counselor.id = :id', { id })
         .getMany();
-
       return { Success: true, content: sessions };
     } catch (error) {
       throw error;
@@ -126,18 +125,27 @@ export class SessionService {
     id: string,
   ): Promise<{ Success: boolean; content: ScheduledSession[] } | Error> {
     try {
-      const currentTime = new Date();
-
+      const currentTime = new Date().toISOString();
       const notexpiredSessions = await this.sessionModel
         .createQueryBuilder('session')
         .leftJoinAndSelect('session.course', 'course')
         .leftJoinAndSelect('session.counselor', 'counselor')
         .where('session.startTime > :currentTime', { currentTime })
         .andWhere('counselor.id = :id', { id })
+        .orderBy('session.createdAt', 'DESC')
+        .select([
+          'session.id',
+          'session.name',
+          'session.startTime',
+          'counselor.id',
+          'counselor.firstName',
+          'counselor.lastName',
+          'counselor.initiatedName',
+        ])
         .getMany();
-
       return { Success: true, content: notexpiredSessions };
     } catch (error) {
+      console.log(error);
       throw error;
     }
   }

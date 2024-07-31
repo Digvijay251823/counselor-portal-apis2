@@ -101,6 +101,39 @@ export class CounseleeAttendanceService {
     }
   }
 
+  async getRsvp(counselorid: string, scheduledSessionId: string) {
+    try {
+      const QueryBuilder = this.attendanceRepository
+        .createQueryBuilder('counselee-attendance')
+        .leftJoinAndSelect('counselee-attendance.counselee', 'counselee')
+        .leftJoinAndSelect('counselee-attendance.counselor', 'counselor')
+        .leftJoinAndSelect(
+          'counselee-attendance.scheduledSession',
+          'scheduledSession',
+        )
+        .where('counselor.id=:id', { id: counselorid })
+        .where('scheduledSession.id=:id', { id: scheduledSessionId })
+        .where('scheduledSession.type=:type', { type: 'RSVP' })
+        .where('counselee-attendance.isRSVP=:isRSVP', {
+          isRSVP: true,
+        })
+        .select([
+          'counselee-attendance',
+          'scheduledSession',
+          'counselee.id',
+          'counselee.firstName',
+          'counselee.lastName',
+          'counselee.initiatedName',
+          'counselee.phoneNumber',
+        ]);
+      const [rsvpSessions, total] = await QueryBuilder.getManyAndCount();
+      return { Success: true, content: rsvpSessions, total };
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+
   async findAllByCounselor(
     id: string,
     pageable: PageableDto,
@@ -187,6 +220,63 @@ export class CounseleeAttendanceService {
         elements: response.length,
         totalPages,
       };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async markRsvp(createAttendanceDto: CreateAttendanceDto) {
+    try {
+      const counselor = await this.counselorRepository.findOne({
+        where: { id: createAttendanceDto.counselorId },
+      });
+      if (!counselor) {
+        throw new HttpException('No Counselor Found With this id', 404);
+      }
+      const counselee = await this.counseleeRepository.findOne({
+        where: { id: createAttendanceDto.counseleeId },
+      });
+      if (!counselee) {
+        throw new HttpException('No Counselor Found With this id', 404);
+      }
+      const rsvp = await this.attendanceRepository.findOne({
+        where: {
+          counselor: { id: counselor.id },
+          counselee: { id: counselee.id },
+          scheduledSession: { id: createAttendanceDto.scheduledSessionId },
+          type: 'RSVP',
+        },
+      });
+
+      const scheduledSession = await this.scheduledSessionRepository.findOne({
+        where: { id: createAttendanceDto.scheduledSessionId },
+      });
+      if (!scheduledSession) {
+        throw new HttpException('No Sessions Found With This Id', 404);
+      }
+      if (!rsvp) {
+        const mark = this.attendanceRepository.create({
+          counselee: { id: counselee.id },
+          counselor: { id: counselor.id },
+          scheduledSession: { id: scheduledSession.id },
+          ...createAttendanceDto,
+        });
+        await this.attendanceRepository.save(mark);
+        return {
+          Success: true,
+          message: 'You Have Confirmed Your Presense For This Session',
+        };
+      } else {
+        rsvp.isRSVP = createAttendanceDto.isRSVP;
+        if (createAttendanceDto.membersComming > 0) {
+          rsvp.membersComming = createAttendanceDto.membersComming;
+        }
+        await this.attendanceRepository.save(rsvp);
+        return {
+          Success: true,
+          message: 'You Have Updated Your Presese Successfully',
+        };
+      }
     } catch (error) {
       throw error;
     }

@@ -16,6 +16,9 @@ export class CreateAttendanceDto {
   @ApiProperty({ enum: ['Attendance', 'RSVP'], default: 'Attendance' })
   type: 'Attendance' | 'RSVP';
 
+  @ApiProperty()
+  membersComming: number;
+
   @ApiProperty({ required: false })
   isRSVP?: boolean;
 }

@@ -112,7 +112,10 @@ export class CounseleeService {
       }
       // Check if a counselee with the same phone number already exists
       const existingCounselee = await this.CounseleeModel.findOne({
-        where: { phoneNumber: inputData.phoneNumber },
+        where: {
+          phoneNumber: inputData.phoneNumber,
+          currentCounselor: { id: inputData.currentCounselor.toString() },
+        },
       });
       if (existingCounselee) {
         throw new HttpException(

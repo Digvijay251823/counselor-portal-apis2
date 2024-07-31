@@ -88,6 +88,11 @@ export class SessionController {
     return this.sessionService.findOneBasedOnCounselorandExpiration(id);
   }
 
+  @Get('counselor/rsvp/:counselorid')
+  async ScheduledSessionsRsvp(@Param('counselorid') counselorid: string) {
+    return this.sessionService.findOneBasedOnCounselorForRsvp(counselorid);
+  }
+
   @Roles(Role.Counselor, Role.CCT)
   @UseGuards(RolesGuard)
   @ApiSecurity('JWT-auth')

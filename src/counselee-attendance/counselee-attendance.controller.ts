@@ -9,6 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import {
+  ApiBody,
   ApiOperation,
   ApiProperty,
   ApiPropertyOptional,
@@ -51,6 +52,20 @@ export class CounseleeAttendanceController {
     { Success: boolean; content: Attendance[] } | Error
   > {
     return await this.attendanceService.findAll();
+  }
+
+  @Get('counselor/rsvp')
+  async getRsvp(
+    @Query('counselorid') counselorid: string,
+    @Query('scheduledSessionId') scheduledSessionId: string,
+  ) {
+    return this.attendanceService.getRsvp(counselorid, scheduledSessionId);
+  }
+
+  @Post('counselor/rsvp/mark')
+  @ApiOperation({ summary: 'Create Rsvp' })
+  async markRsvp(@Body() createAttendanceDto: CreateAttendanceDto) {
+    return this.attendanceService.markRsvp(createAttendanceDto);
   }
 
   @Get('counselor/:id')

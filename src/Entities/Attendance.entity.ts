@@ -31,6 +31,8 @@ export class Attendance {
   type: 'Attendance' | 'RSVP';
   @Column({ nullable: true })
   isRSVP: boolean;
+  @Column({ default: 0 })
+  membersComming: number;
   @Column({ default: false })
   approved: boolean;
   @CreateDateColumn()
