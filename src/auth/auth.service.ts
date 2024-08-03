@@ -63,57 +63,57 @@ export class AuthService {
       throw error;
     }
   }
-  // async authenticate(email: string, password: string) {
-  //   try {
-  //     const Counselor = await this.counselorModel.findOne({
-  //       where: { email },
-  //       select: [
-  //         'id',
-  //         'password',
-  //         'autoApprove',
-  //         'firstName',
-  //         'lastName',
-  //         'initiatedName',
-  //         'phoneNumber',
-  //         'email',
-  //         'role',
-  //       ],
-  //     });
-  //     if (!Counselor) {
-  //       throw new HttpException(
-  //         'counselor with credentials not found try signup',
-  //         404,
-  //       );
-  //     }
-  //     if (!Counselor.password) {
-  //       throw new HttpException(
-  //         'you dont have a password attached to you account try reseting it',
-  //         400,
-  //       );
-  //     }
-  //     const isMatched = await Counselor.comparePassword(password);
-  //     if (!isMatched) {
-  //       throw new HttpException('invalid credentials', HttpStatus.BAD_REQUEST);
-  //     }
-  //     const token = Counselor.getJWTToken();
-  //     const user = {
-  //       id: Counselor.id,
-  //       initiatedName: Counselor.initiatedName,
-  //       email: Counselor.email,
-  //       phoneNumber: Counselor.phoneNumber,
-  //       role: Counselor.role,
-  //       autoApprove: Counselor.autoApprove,
-  //     };
-  //     return {
-  //       Success: true,
-  //       counselor: user,
-  //       token,
-  //       message: 'authenticated successfully',
-  //     };
-  //   } catch (error) {
-  //     throw error;
-  //   }
-  // }
+  async signin(email: string, password: string) {
+    try {
+      const Counselor = await this.counselorModel.findOne({
+        where: { email },
+        select: [
+          'id',
+          'password',
+          'autoApprove',
+          'firstName',
+          'lastName',
+          'initiatedName',
+          'phoneNumber',
+          'email',
+          'role',
+        ],
+      });
+      if (!Counselor) {
+        throw new HttpException(
+          'counselor with credentials not found try signup',
+          404,
+        );
+      }
+      if (!Counselor.password) {
+        throw new HttpException(
+          'you dont have a password attached to you account try reseting it',
+          400,
+        );
+      }
+      const isMatched = await Counselor.comparePassword(password);
+      if (!isMatched) {
+        throw new HttpException('invalid credentials', HttpStatus.BAD_REQUEST);
+      }
+      const token = Counselor.getJWTToken();
+      const user = {
+        id: Counselor.id,
+        initiatedName: Counselor.initiatedName,
+        email: Counselor.email,
+        phoneNumber: Counselor.phoneNumber,
+        role: Counselor.role,
+        autoApprove: Counselor.autoApprove,
+      };
+      return {
+        Success: true,
+        counselor: user,
+        token,
+        message: 'authenticated successfully',
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
 
   async registeration(phoneNumber: string, email: string, password: string) {
     try {

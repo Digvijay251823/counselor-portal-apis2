@@ -32,6 +32,8 @@ export class ScheduledSession {
   @ManyToOne(() => Counselor)
   @JoinColumn()
   counselor: Counselor;
+  @Column({ default: 0 })
+  totalAttendance: number;
   @CreateDateColumn()
   createdAt: Date;
   @UpdateDateColumn()

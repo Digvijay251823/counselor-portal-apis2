@@ -13,6 +13,9 @@ export class CreateScheduledSessionDto {
   @ApiProperty()
   modeOfAttendance: string;
 
+  @ApiProperty({ example: 0 })
+  totalAttendance: number;
+
   @ApiProperty()
   courseId: string; // Assuming this is the ID of the Course entity
 
@@ -32,6 +35,9 @@ export class UpdateScheduledSessionDto {
 
   @ApiProperty()
   modeOfAttendance?: string;
+
+  @ApiProperty({ example: 0 })
+  totalAttendance: number;
 
   @ApiProperty()
   courseId?: string;

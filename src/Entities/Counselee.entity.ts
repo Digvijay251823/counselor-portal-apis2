@@ -60,9 +60,12 @@ export class Counselee {
   spouce: Counselee;
   @Column({ type: 'jsonb', nullable: true })
   children: JSON;
+  @Column({ default: 0 })
+  sessionsAttended: number;
+  @Column({ default: 0 })
+  totalSessions: number;
   @CreateDateColumn()
   createdAt: Date;
-
   @UpdateDateColumn()
   updatedAt: Date;
 }

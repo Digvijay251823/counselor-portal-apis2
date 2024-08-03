@@ -19,7 +19,15 @@ import { ApiResponseMessage } from 'src/Entities/DTOS/Success.dto';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
   @ApiResponseMessage('successFully signed in')
-  // @ApiBody({ type: AuthCredentialsDto })
+  @ApiBody({ type: AuthCredentialsDto })
+  @Post('/authenticate')
+  async signin(
+    @Body('email') email: string,
+    @Body('password') password: string,
+  ) {
+    return await this.authService.signin(email, password);
+  }
+  @ApiResponseMessage('successFully signed in')
   @Post('/authenticate/:phoneNumber')
   async authenticate(
     // @Body('email') email: string,

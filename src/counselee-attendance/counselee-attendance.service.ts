@@ -54,7 +54,6 @@ export class CounseleeAttendanceService {
           `Counselor with id ${counselorId} not found`,
           404,
         );
-
       const existingAttendance = await this.attendanceRepository.findOne({
         where: {
           scheduledSession: { id: scheduledSessionId },
@@ -79,6 +78,10 @@ export class CounseleeAttendanceService {
         approved: counselor.autoApprove,
       });
       await this.attendanceRepository.save(attendance);
+      counselee.sessionsAttended += 1;
+      await this.counseleeRepository.save(counselee);
+      scheduledSession.totalAttendance += 1;
+      await this.counseleeRepository.save(counselee);
       return { Success: true, message: 'Successfully marked attendance' };
     } catch (error) {
       throw error;
@@ -158,6 +161,16 @@ export class CounseleeAttendanceService {
           'counselee.initiatedName',
           'counselee.phoneNumber',
         ]);
+      if (attendanceFilter.sessionName) {
+        query.where('scheduledSession.name ILIKE :sessionName', {
+          sessionName: `%${attendanceFilter.sessionName}%`,
+        });
+      }
+      if (attendanceFilter.type) {
+        query.where('counselee-attendance.type  =:type', {
+          type: attendanceFilter.type,
+        });
+      }
       if (attendanceFilter.approvedstate) {
         query.where('counselee-attendance.approved  =:approved', {
           approved:

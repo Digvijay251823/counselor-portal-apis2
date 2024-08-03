@@ -175,6 +175,14 @@ export class SessionService {
         counselor: counselor,
       });
       await this.sessionModel.save(scheduledSession);
+      await this.CounseleeModel.createQueryBuilder('scheduleSession')
+        .update(Counselee)
+        .set({ totalSessions: () => 'totalSessions + 1' })
+        .where('scheduledSession.counselor = :counselor', {
+          counselor: counselor.id,
+        })
+        .execute();
+
       return { Success: true, message: 'Successfully added a session' };
     } catch (error) {
       throw error;

@@ -36,6 +36,10 @@ export class CounseleeSchema {
   currentCounselor: string;
   @ApiProperty()
   connectedToCounselorSinceYear: Date;
+  @ApiProperty({ example: 0 })
+  sessionsAttended: number;
+  @ApiProperty({ example: 0 })
+  totalSessions: number;
   @ApiProperty()
   spouce: string;
   @ApiProperty({ type: () => [childrenSchema] })

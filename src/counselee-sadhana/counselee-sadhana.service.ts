@@ -152,7 +152,8 @@ export class CounseleeSadhanaService {
         });
       }
       let page = pageable.page ? pageable.page : 0;
-      const limit = pageable.size || 10;
+      const limit = pageable.size ? pageable.size : 10;
+
       const skip = page === 0 ? 0 : page * limit;
       query
         .skip(skip)
@@ -162,8 +163,8 @@ export class CounseleeSadhanaService {
           'DESC',
         );
       const [SadhanaEntries, total] = await query.getManyAndCount();
+      const totalPages = Math.round(total / limit);
 
-      const totalPages = Math.ceil(Number(total) / limit);
       return {
         Success: true,
         content: SadhanaEntries,

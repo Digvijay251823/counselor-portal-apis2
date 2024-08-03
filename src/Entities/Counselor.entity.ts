@@ -54,8 +54,8 @@ export class Counselor {
   yourInitiatingSpiritualMaster: string;
   @Column({ nullable: true })
   harinamInitiationDate: Date;
-  @Column({ default: 'counselor' })
-  role: 'cct' | 'counselor';
+  @Column({ default: 'assistantcounselor' })
+  role: 'cct' | 'counselor' | 'assistantcounselor';
   @Column({ nullable: true })
   harinamInitiationPlace: string;
   @Column({ type: 'jsonb', nullable: true })

@@ -9,5 +9,7 @@ export class CounseleeAttendanceFilter extends CounseleeFilter {
   @ApiPropertyOptional()
   lastName: string;
   @ApiPropertyOptional()
+  type: 'Attendance' | 'RSVP';
+  @ApiPropertyOptional()
   approvedstate: 'approved' | 'pending';
 }
