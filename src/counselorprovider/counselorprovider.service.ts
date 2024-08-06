@@ -25,6 +25,7 @@ export class CounselorproviderService {
       const queryBuilder = this.counselorProvider
         .createQueryBuilder('counselorProvider')
         .leftJoinAndSelect('counselorProvider.counselee', 'counselee')
+        .leftJoinAndSelect('counselee.currentCounselor', 'counselor')
         .leftJoinAndSelect(
           'counselorProvider.preferedCounselor1',
           'preferedCounselor1',
@@ -43,6 +44,10 @@ export class CounselorproviderService {
           'counselee.lastName',
           'counselee.phoneNumber',
           'counselee.initiatedName',
+          'counselor.firstName',
+          'counselor.lastName',
+          'counselor.phoneNumber',
+          'counselor.initiatedName',
           'preferedCounselor1.initiatedName',
           'preferedCounselor1.firstName',
           'preferedCounselor1.lastName',
