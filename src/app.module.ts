@@ -46,6 +46,9 @@ import { CBMAttendance } from './Entities/CBMAttendance.entity';
 import { CbmSevaService } from './cbm-seva/cbm-seva.service';
 import { CbmSevaController } from './cbm-seva/cbm-seva.controller';
 import { CBMSeva } from './Entities/CBMSeva.entity';
+import { PlanningrelocateService } from './planningrelocate/planningrelocate.service';
+import { PlanningrelocateController } from './planningrelocate/planningrelocate.controller';
+import { PlanningRelocateEntity } from './Entities/PlanningRelocate.entity';
 
 @Module({
   imports: [
@@ -73,6 +76,7 @@ import { CBMSeva } from './Entities/CBMSeva.entity';
           CBMAttendance,
           SadhanaConfigure,
           counseleeActivity,
+          PlanningRelocateEntity,
           Course,
           ScheduledSession,
           Attendance,
@@ -119,6 +123,7 @@ I0zDRkgS7DfnFcUCBFQHAOhreUocOlI/dYK9AnIwhs3aFT7PBA==
       CBMAttendance,
       CBMSeva,
       SadhanaConfigure,
+      PlanningRelocateEntity,
       counseleeActivity,
       Course,
       ScheduledSession,
@@ -144,6 +149,7 @@ I0zDRkgS7DfnFcUCBFQHAOhreUocOlI/dYK9AnIwhs3aFT7PBA==
     CbmMeetingsController,
     CbmattendanceController,
     CbmSevaController,
+    PlanningrelocateController,
   ],
   providers: [
     CounselorService,
@@ -161,6 +167,7 @@ I0zDRkgS7DfnFcUCBFQHAOhreUocOlI/dYK9AnIwhs3aFT7PBA==
     CbmMeetingsService,
     CbmattendanceService,
     CbmSevaService,
+    PlanningrelocateService,
   ],
 })
 export class AppModule {}

@@ -1,6 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { NotFoundError } from 'rxjs';
 import { Counselee } from 'src/Entities/Counselee.entity';
 import { Counselor } from 'src/Entities/Counselor.entity';
 import { CounselorUpdateDto } from 'src/Entities/DTOS/counselor.dto';
@@ -17,6 +16,7 @@ export class CounselorService {
     @InjectRepository(Counselee)
     private readonly CounseleeRepository: Repository<Counselee>,
   ) {}
+
   async getCounselor(pageable: PageableDto, counselorFilter: CounselorFilter) {
     try {
       const query = this.CounselorRepository.createQueryBuilder(
