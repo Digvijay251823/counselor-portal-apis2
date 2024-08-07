@@ -63,10 +63,10 @@ export class AuthService {
       throw error;
     }
   }
-  async signin(email: string, password: string) {
+  async signin(phoneNumber: string, password: string) {
     try {
       const Counselor = await this.counselorModel.findOne({
-        where: { email },
+        where: { phoneNumber },
         select: [
           'id',
           'password',
@@ -98,6 +98,8 @@ export class AuthService {
       const token = Counselor.getJWTToken();
       const user = {
         id: Counselor.id,
+        firstName: Counselor.firstName,
+        lastName: Counselor.lastName,
         initiatedName: Counselor.initiatedName,
         email: Counselor.email,
         phoneNumber: Counselor.phoneNumber,

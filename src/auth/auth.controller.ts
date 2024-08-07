@@ -22,10 +22,10 @@ export class AuthController {
   @ApiBody({ type: AuthCredentialsDto })
   @Post('/authenticate')
   async signin(
-    @Body('email') email: string,
+    @Body('phoneNumber') phoneNumber: string,
     @Body('password') password: string,
   ) {
-    return await this.authService.signin(email, password);
+    return await this.authService.signin(phoneNumber, password);
   }
   @ApiResponseMessage('successFully signed in')
   @Post('/authenticate/:phoneNumber')

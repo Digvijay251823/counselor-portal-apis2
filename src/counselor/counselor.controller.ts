@@ -8,8 +8,6 @@ import {
   Put,
   Query,
   UseGuards,
-  UsePipes,
-  ValidationPipe,
 } from '@nestjs/common';
 import {
   ApiBody,
@@ -54,10 +52,17 @@ export class CounselorController {
   ) {
     return this.counselorService.getCounselor(pageable, counselorFilter);
   }
+  @Get('/assistant-counselor')
+  async getAssistantCounselors(
+    @Query() pageable: PageableDto,
+    @Query() counselorFilter: CounselorFilter,
+  ) {
+    return this.counselorService.getAssistantCounselor(
+      pageable,
+      counselorFilter,
+    );
+  }
 
-  @Roles(Role.Counselor)
-  @UseGuards(RolesGuard)
-  @ApiSecurity('JWT-auth')
   @ApiResponseMessage('Counselor created successfully')
   @ApiBody({ type: CounselorSchema })
   @Post('/create')

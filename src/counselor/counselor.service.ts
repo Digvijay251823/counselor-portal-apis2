@@ -76,6 +76,69 @@ export class CounselorService {
       throw error;
     }
   }
+  async getAssistantCounselor(
+    pageable: PageableDto,
+    counselorFilter: CounselorFilter,
+  ) {
+    try {
+      const query = this.CounselorRepository.createQueryBuilder('counselor')
+        .leftJoinAndSelect('counselor.spouce', 'spouce')
+        .where(`counselor.role = :role`, { role: 'assistantcounselor' });
+      if (counselorFilter.firstName) {
+        query.andWhere('counselor.firstName ILIKE :firstName', {
+          firstName: `%${counselorFilter.firstName}%`,
+        });
+      }
+      if (counselorFilter.lastName) {
+        query.andWhere('counselor.lastName ILIKE :lastName', {
+          lastName: `%${counselorFilter.lastName}%`,
+        });
+      }
+      if (counselorFilter.initiatedName) {
+        query.andWhere('counselor.initiatedName ILIKE :initiatedName', {
+          initiatedName: `%${counselorFilter.initiatedName}%`,
+        });
+      }
+      if (counselorFilter.phoneNumber) {
+        query.andWhere('counselor.phoneNumber ILIKE :phoneNumber', {
+          phoneNumber: `%${counselorFilter.phoneNumber}%`,
+        });
+      }
+      if (counselorFilter.gender) {
+        query.andWhere('counselor.gender ILIKE :gender', {
+          gender: counselorFilter.gender,
+        });
+      }
+      if (counselorFilter.maritalStatus) {
+        query.andWhere('counselor.maritalStatus ILIKE :maritalStatus', {
+          maritalStatus: `%${counselorFilter.maritalStatus}%`,
+        });
+      }
+      let page = pageable.page || 1;
+      if (page < 1) {
+        page = 1;
+      }
+
+      const limit = pageable.size ? pageable.size : 10;
+      const skip = (pageable?.page > 0 ? Number(pageable.page) - 1 : 0) * limit;
+      query.skip(skip).take(limit);
+      const [counselor, total] = await query.getManyAndCount();
+      const totalPages = Math.ceil(total / limit);
+      return {
+        Success: true,
+        content: counselor,
+        total,
+        currentPage: pageable.page,
+        size: pageable.size,
+        elements: counselor.length,
+        totalPages,
+        skiped: skip,
+      };
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
 
   async createCounselor(counselorDto: Partial<Counselor>) {
     try {
