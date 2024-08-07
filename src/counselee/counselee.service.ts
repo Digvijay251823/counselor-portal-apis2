@@ -110,11 +110,11 @@ export class CounseleeService {
           HttpStatus.BAD_REQUEST,
         );
       }
+
       // Check if a counselee with the same phone number already exists
       const existingCounselee = await this.CounseleeModel.findOne({
         where: {
           phoneNumber: inputData.phoneNumber,
-          currentCounselor: { id: inputData.currentCounselor.toString() },
         },
       });
       if (existingCounselee) {
@@ -123,7 +123,6 @@ export class CounseleeService {
           HttpStatus.CONFLICT,
         );
       }
-
       // Create the new counselee
       const newCounselee = this.CounseleeModel.create(inputData);
       await this.CounseleeModel.save(newCounselee);
@@ -133,6 +132,7 @@ export class CounseleeService {
         message: 'Counselee created successfully',
       };
     } catch (error) {
+      console.log(error);
       throw error;
     }
   }
