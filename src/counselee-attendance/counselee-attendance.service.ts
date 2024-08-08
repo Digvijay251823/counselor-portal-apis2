@@ -106,33 +106,43 @@ export class CounseleeAttendanceService {
 
   async getRsvp(counselorid: string, scheduledSessionId: string) {
     try {
-      const QueryBuilder = this.attendanceRepository
-        .createQueryBuilder('counselee-attendance')
-        .leftJoinAndSelect('counselee-attendance.counselee', 'counselee')
-        .leftJoinAndSelect('counselee-attendance.counselor', 'counselor')
-        .leftJoinAndSelect(
-          'counselee-attendance.scheduledSession',
-          'scheduledSession',
-        )
-        .where('counselor.id=:id', { id: counselorid })
-        .where('scheduledSession.id=:id', { id: scheduledSessionId })
-        .where('scheduledSession.type=:type', { type: 'RSVP' })
-        .where('counselee-attendance.isRSVP=:isRSVP', {
-          isRSVP: true,
-        })
-        .select([
-          'counselee-attendance',
-          'scheduledSession',
-          'counselee.id',
-          'counselee.firstName',
-          'counselee.lastName',
-          'counselee.initiatedName',
-          'counselee.phoneNumber',
-        ]);
-      const [rsvpSessions, total] = await QueryBuilder.getManyAndCount();
+      console.log(counselorid, scheduledSessionId);
+
+      // const QueryBuilder = this.attendanceRepository
+      //   .createQueryBuilder('counselee-attendance')
+      //   .leftJoinAndSelect('counselee-attendance.counselee', 'counselee')
+      //   .leftJoinAndSelect('counselee-attendance.counselor', 'counselor')
+      //   .leftJoinAndSelect(
+      //     'counselee-attendance.scheduledSession',
+      //     'scheduledSession',
+      //   )
+      //   .where('counselor.id=:id', { id: counselorid })
+      //   .where('scheduledSession.id = :id', { id: scheduledSessionId })
+      //   .where('scheduledSession.type = :type', { type: 'RSVP' })
+      //   .where('counselee-attendance.isRSVP = :isRSVP', {
+      //     isRSVP: true,
+      //   })
+      //   .select([
+      //     'counselee-attendance',
+      //     'scheduledSession',
+      //     'counselee.id',
+      //     'counselee.firstName',
+      //     'counselee.lastName',
+      //     'counselee.initiatedName',
+      //     'counselee.phoneNumber',
+      //   ]);
+      const [rsvpSessions, total] =
+        await this.attendanceRepository.findAndCount({
+          where: {
+            counselor: { id: counselorid },
+            scheduledSession: { id: scheduledSessionId },
+            type: 'RSVP',
+            isRSVP: true,
+          },
+          relations: ['counselee', 'scheduledSession', 'counselor'],
+        });
       return { Success: true, content: rsvpSessions, total };
     } catch (error) {
-      console.log(error);
       throw error;
     }
   }
