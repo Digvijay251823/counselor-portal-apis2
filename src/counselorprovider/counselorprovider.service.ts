@@ -40,10 +40,12 @@ export class CounselorproviderService {
         )
         .select([
           'counselorProvider',
+          'counselee.id',
           'counselee.firstName',
           'counselee.lastName',
           'counselee.phoneNumber',
           'counselee.initiatedName',
+          'counselor.id',
           'counselor.firstName',
           'counselor.lastName',
           'counselor.phoneNumber',
