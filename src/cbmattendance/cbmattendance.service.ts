@@ -5,6 +5,7 @@ import { CBMMeeting } from 'src/Entities/CBMMeetings.entity';
 import { Counselor } from 'src/Entities/Counselor.entity';
 import { CreateCBMAttendanceDto } from 'src/Entities/DTOS/cbmattendance.dto';
 import { CbmAttendanceFilter } from 'src/Entities/DTOS/Filters/cbmattendance.dto';
+import { CbmMeetingFilter } from 'src/Entities/DTOS/Filters/cbmMeetings.dto';
 import { PageableDto } from 'src/Entities/DTOS/pageable.dto';
 import { Repository } from 'typeorm';
 
@@ -79,6 +80,11 @@ export class CbmattendanceService {
           firstName: `%${cbmAttendanceFilter.firstName}%`,
         });
       }
+      if (cbmAttendanceFilter.sessionName) {
+        queryBuilder.andWhere('cbmMeeting.name ILIKE :sessionName', {
+          sessionName: `%${cbmAttendanceFilter.sessionName}%`,
+        });
+      }
       if (cbmAttendanceFilter.lastName) {
         queryBuilder.andWhere('counselor.lastName ILIKE :lastName', {
           lastName: `%${cbmAttendanceFilter.lastName}%`,
@@ -124,7 +130,10 @@ export class CbmattendanceService {
       let page = pageable.page ? pageable.page : 0;
       const limit = pageable.size || 10;
       const skip = page === 0 ? 0 : page * limit;
-      queryBuilder.skip(skip).take(limit);
+      queryBuilder
+        .skip(skip)
+        .take(limit)
+        .orderBy('cbmMeeting.startTime', 'DESC');
       const [attendance, total] = await queryBuilder.getManyAndCount();
       const totalPages = Math.ceil(Number(total) / limit);
 
@@ -138,6 +147,7 @@ export class CbmattendanceService {
         totalPages,
       };
     } catch (error) {
+      console.log(error);
       throw error;
     }
   }

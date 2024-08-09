@@ -3,6 +3,8 @@ import { CounselorFilter } from './counselor.dto';
 
 export class CbmAttendanceFilter extends CounselorFilter {
   @ApiPropertyOptional()
+  sessionName: string;
+  @ApiPropertyOptional()
   startTime: Date;
   @ApiPropertyOptional()
   modeOfAttendance: 'OFFLINE' | 'ONLINE';

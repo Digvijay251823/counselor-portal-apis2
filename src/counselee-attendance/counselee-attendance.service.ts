@@ -215,7 +215,10 @@ export class CounseleeAttendanceService {
       let page = pageable.page ? pageable.page : 0;
       const limit = pageable.size || 10;
       const skip = page === 0 ? 0 : page * limit;
-      query.skip(skip).take(limit);
+      query
+        .skip(skip)
+        .take(limit)
+        .orderBy('scheduledSession.startTime', 'DESC');
 
       const [response, total] = await query.getManyAndCount();
       const approveFilter = await this.attendanceRepository.find({
